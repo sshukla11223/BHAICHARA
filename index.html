@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
@@ -17,8 +17,8 @@ html,body{
   height:100%;
   overflow:hidden;
   background:
-    radial-gradient(circle at center,#123348 0%,#06131e 55%,#02070c 100%);
-  font-family:Arial,sans-serif;
+    radial-gradient(circle at 50% 45%,#163b50 0%,#07141f 48%,#02070c 100%);
+  font-family:Arial,Helvetica,sans-serif;
 }
 
 body{
@@ -28,45 +28,45 @@ body{
 }
 
 .game{
-  width:min(96vw,96vh,900px);
-  height:min(96vw,96vh,900px);
   position:relative;
+  width:min(97vw,97vh,1000px);
+  height:min(97vw,97vh,1000px);
 }
 
-.title{
+.logo{
   position:absolute;
-  top:5px;
+  top:7px;
   left:18px;
-  z-index:20;
-  color:white;
-  font-size:clamp(18px,4vw,30px);
-  font-weight:900;
+  z-index:50;
+  color:#fff;
+  font-size:clamp(18px,4vw,32px);
+  font-weight:1000;
   letter-spacing:4px;
-  text-shadow:0 3px 8px #000;
+  text-shadow:0 4px 10px #000;
 }
 
 .online{
   position:absolute;
   right:18px;
-  top:8px;
-  z-index:20;
-  padding:7px 13px;
-  border:1px solid #43ff9a;
-  border-radius:20px;
-  color:#59ffad;
+  top:10px;
+  z-index:50;
+  padding:7px 15px;
+  border:1px solid #45ff9b;
+  border-radius:30px;
+  color:#5cffad;
+  background:#03120ddd;
   font-size:11px;
-  font-weight:bold;
-  background:#03120dcc;
+  font-weight:900;
 }
 
-.online span{
+.online i{
   display:inline-block;
-  width:7px;
-  height:7px;
-  margin-right:5px;
+  width:8px;
+  height:8px;
+  margin-right:6px;
   border-radius:50%;
-  background:#45ff9b;
-  box-shadow:0 0 10px #45ff9b;
+  background:#46ff9b;
+  box-shadow:0 0 10px #46ff9b;
 }
 
 svg{
@@ -75,10 +75,11 @@ svg{
   height:100%;
   left:0;
   top:0;
+  overflow:visible;
 }
 
 .cell{
-  stroke:#172936;
+  stroke:#102431;
   stroke-width:2;
 }
 
@@ -87,24 +88,16 @@ svg{
 }
 
 .selectable{
-  animation:pulse .65s infinite alternate;
+  animation:pulse .7s infinite alternate;
 }
 
 @keyframes pulse{
   from{
-    filter:drop-shadow(0 0 2px white);
+    filter:drop-shadow(0 0 3px white);
   }
   to{
-    filter:drop-shadow(0 0 13px white);
+    filter:drop-shadow(0 0 16px white);
   }
-}
-
-#dice{
-  cursor:pointer;
-}
-
-#dice.disabled{
-  opacity:.5;
 }
 
 .turn{
@@ -112,15 +105,15 @@ svg{
   bottom:8px;
   left:50%;
   transform:translateX(-50%);
-  background:#020911dd;
-  border:1px solid #ffffff33;
+  z-index:50;
+  padding:8px 17px;
+  border:1px solid #ffffff35;
   border-radius:30px;
-  padding:8px 16px;
+  background:#020911e8;
   color:#fff;
   font-size:12px;
-  font-weight:bold;
+  font-weight:800;
   white-space:nowrap;
-  z-index:30;
 }
 
 .notice{
@@ -128,13 +121,13 @@ svg{
   left:50%;
   top:50%;
   transform:translate(-50%,-50%);
-  padding:12px 22px;
-  background:#020912ed;
+  z-index:100;
+  padding:12px 24px;
   border:1px solid #ffffff44;
-  border-radius:15px;
-  color:white;
-  font-weight:bold;
-  z-index:50;
+  border-radius:16px;
+  background:#020911ef;
+  color:#fff;
+  font-weight:900;
   opacity:0;
   pointer-events:none;
   transition:.2s;
@@ -143,6 +136,10 @@ svg{
 .notice.show{
   opacity:1;
 }
+
+#dice{
+  cursor:pointer;
+}
 </style>
 </head>
 
@@ -150,10 +147,10 @@ svg{
 
 <div class="game">
 
-<div class="title">BHAICHARA</div>
+<div class="logo">BHAICHARA</div>
 
 <div class="online">
-<span></span>ONLINE
+<i></i>ONLINE
 </div>
 
 <svg viewBox="0 0 1000 1000">
@@ -161,107 +158,167 @@ svg{
 <defs>
 
 <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-<stop offset="0" stop-color="#81530e"/>
-<stop offset=".45" stop-color="#ffe17b"/>
-<stop offset="1" stop-color="#9b6415"/>
+<stop offset="0" stop-color="#82510d"/>
+<stop offset=".25" stop-color="#d89a25"/>
+<stop offset=".5" stop-color="#ffe58a"/>
+<stop offset=".75" stop-color="#d28d1c"/>
+<stop offset="1" stop-color="#77480b"/>
 </linearGradient>
 
 <radialGradient id="blueToken">
-<stop offset="0" stop-color="#5bc3ff"/>
-<stop offset=".65" stop-color="#168be5"/>
-<stop offset="1" stop-color="#03497e"/>
+<stop offset="0" stop-color="#63c9ff"/>
+<stop offset=".6" stop-color="#168bea"/>
+<stop offset="1" stop-color="#03477c"/>
 </radialGradient>
 
 <radialGradient id="yellowToken">
-<stop offset="0" stop-color="#fff46a"/>
-<stop offset=".65" stop-color="#edc400"/>
-<stop offset="1" stop-color="#8b6800"/>
+<stop offset="0" stop-color="#fff77b"/>
+<stop offset=".6" stop-color="#edc500"/>
+<stop offset="1" stop-color="#866300"/>
 </radialGradient>
 
 <radialGradient id="purpleToken">
-<stop offset="0" stop-color="#e19aff"/>
-<stop offset=".65" stop-color="#9234c7"/>
-<stop offset="1" stop-color="#4b126d"/>
+<stop offset="0" stop-color="#e8a0ff"/>
+<stop offset=".6" stop-color="#9136c8"/>
+<stop offset="1" stop-color="#4b126e"/>
 </radialGradient>
 
 <radialGradient id="redToken">
-<stop offset="0" stop-color="#ff7777"/>
-<stop offset=".65" stop-color="#dd3030"/>
-<stop offset="1" stop-color="#741313"/>
+<stop offset="0" stop-color="#ff8585"/>
+<stop offset=".6" stop-color="#dc3030"/>
+<stop offset="1" stop-color="#711010"/>
 </radialGradient>
 
 <radialGradient id="greenToken">
-<stop offset="0" stop-color="#71ffa1"/>
-<stop offset=".65" stop-color="#19aa59"/>
+<stop offset="0" stop-color="#7affaa"/>
+<stop offset=".6" stop-color="#19aa59"/>
 <stop offset="1" stop-color="#075b2d"/>
 </radialGradient>
 
 <radialGradient id="orangeToken">
-<stop offset="0" stop-color="#ffc078"/>
-<stop offset=".65" stop-color="#ef751b"/>
-<stop offset="1" stop-color="#873600"/>
+<stop offset="0" stop-color="#ffc47e"/>
+<stop offset=".6" stop-color="#ef751b"/>
+<stop offset="1" stop-color="#873500"/>
 </radialGradient>
 
-<filter id="shadow">
-<feDropShadow dx="0" dy="8" stdDeviation="8"
-flood-color="#000" flood-opacity=".65"/>
+<filter id="boardShadow">
+<feDropShadow dx="0" dy="12" stdDeviation="12"
+flood-color="#000" flood-opacity=".75"/>
+</filter>
+
+<filter id="tokenShadow">
+<feDropShadow dx="0" dy="4" stdDeviation="3"
+flood-color="#000" flood-opacity=".7"/>
 </filter>
 
 </defs>
 
-<!-- OUTER BOARD -->
+
+<!-- OUTER FRAME -->
 
 <circle
 cx="500"
 cy="500"
-r="465"
-fill="#06121c"
+r="470"
+fill="#020b12"
 stroke="url(#gold)"
 stroke-width="20"
-filter="url(#shadow)"
+filter="url(#boardShadow)"
 />
 
 <circle
 cx="500"
 cy="500"
-r="435"
-fill="#092332"
-stroke="#294a60"
+r="442"
+fill="#0a2433"
+stroke="#315268"
 stroke-width="5"
 />
 
-<!-- HOME ZONES -->
-<g id="homes"></g>
-
-<!-- TRACK -->
-<g id="track"></g>
-
-<!-- SAFE STARS -->
-<g id="safe"></g>
-
-<!-- CENTER -->
-<polygon
-points="500,365 617,432 617,568 500,635 383,568 383,432"
-fill="#06121c"
-stroke="url(#gold)"
-stroke-width="10"
-filter="url(#shadow)"
+<circle
+cx="500"
+cy="500"
+r="420"
+fill="none"
+stroke="#06131d"
+stroke-width="18"
 />
 
-<polygon
-points="500,390 590,442 590,558 500,610 410,558 410,442"
-fill="#1578d1"
-stroke="#7ed1ff"
+
+<!-- HOMES -->
+
+<g id="homes"></g>
+
+
+<!-- TRACK BACKING -->
+
+<circle
+cx="500"
+cy="500"
+r="335"
+fill="none"
+stroke="#06121b"
+stroke-width="108"
+/>
+
+<circle
+cx="500"
+cy="500"
+r="335"
+fill="none"
+stroke="#203b4a"
 stroke-width="4"
 />
 
+
+<!-- TRACK -->
+
+<g id="track"></g>
+
+
+<!-- SAFE STARS -->
+
+<g id="safe"></g>
+
+
+<!-- HOME LANES -->
+
+<g id="lanes"></g>
+
+
+<!-- CENTER -->
+
+<polygon
+points="500,358 628,432 628,568 500,642 372,568 372,432"
+fill="#030b12"
+stroke="url(#gold)"
+stroke-width="11"
+filter="url(#boardShadow)"
+/>
+
+<polygon
+points="500,386 598,443 598,557 500,614 402,557 402,443"
+fill="#1478d1"
+stroke="#80d3ff"
+stroke-width="4"
+/>
+
+<polygon
+points="500,411 575,455 575,545 500,589 425,545 425,455"
+fill="#1b82db"
+stroke="#a5ddff"
+stroke-width="2"
+/>
+
+
 <!-- DICE -->
+
 <g id="dice" transform="translate(500 500)">
 
 <polygon
-points="0,-55 48,-28 48,28 0,55 -48,28 -48,-28"
-fill="#1479d4"
-stroke="#a4dcff"
+points="0,-52 45,-26 45,26 0,52 -45,26 -45,-26"
+fill="#0e70c9"
+stroke="#d0edff"
 stroke-width="4"
 />
 
@@ -269,10 +326,13 @@ stroke-width="4"
 
 </g>
 
+
 <!-- TOKENS -->
+
 <g id="tokens"></g>
 
 </svg>
+
 
 <div id="notice" class="notice"></div>
 
@@ -285,16 +345,16 @@ P1 की बारी • Dice दबाएँ
 
 <script>
 
-/* =====================================
-   BHAICHARA
-   6 PLAYERS / 3 PARTNER TEAMS
-   ===================================== */
+/* ==========================================
+   BHAICHARA V2
+   ========================================== */
 
 const NS="http://www.w3.org/2000/svg";
 
 const homes=document.getElementById("homes");
 const track=document.getElementById("track");
 const safeLayer=document.getElementById("safe");
+const lanes=document.getElementById("lanes");
 const tokensLayer=document.getElementById("tokens");
 const pips=document.getElementById("pips");
 const dice=document.getElementById("dice");
@@ -354,12 +414,12 @@ const players=[
 /* PARTNERS */
 
 const partner={
- 0:3,
- 3:0,
- 1:4,
- 4:1,
- 2:5,
- 5:2
+0:3,
+3:0,
+1:4,
+4:1,
+2:5,
+5:2
 };
 
 
@@ -368,71 +428,45 @@ const partner={
 const CX=500;
 const CY=500;
 
-const PATH_RADIUS=330;
+const PATH_R=335;
 
-const TOTAL_CELLS=72;
+const CELLS=72;
 
-
-/* START POSITIONS */
-
-const starts=[
- 0,
- 12,
- 24,
- 36,
- 48,
- 60
-];
-
-
-/* 12 SAFE STARS */
-
-const safe=[];
-
-for(let i=0;i<6;i++){
-
- safe.push(starts[i]);
-
- safe.push((starts[i]+6)%TOTAL_CELLS);
-
-}
-
-
-/* HOME ANGLES */
+const starts=[0,12,24,36,48,60];
 
 const homeAngles=[
- -90,
- -30,
- 30,
- 90,
- 150,
- 210
+-90,
+-30,
+30,
+90,
+150,
+210
 ];
 
 
-/* =====================================
-   SVG HELPERS
-   ===================================== */
+/* ==========================================
+   HELPERS
+   ========================================== */
 
-function create(tag,attrs={}){
+function el(tag,attrs={}){
 
- const node=document.createElementNS(NS,tag);
+ const e=document.createElementNS(NS,tag);
 
  for(const key in attrs){
-   node.setAttribute(key,attrs[key]);
+   e.setAttribute(key,attrs[key]);
  }
 
- return node;
+ return e;
 }
 
 
 function polar(radius,angle){
 
- const rad=(angle-90)*Math.PI/180;
+ const r=(angle-90)*Math.PI/180;
 
- return [
-   CX+radius*Math.cos(rad),
-   CY+radius*Math.sin(rad)
+ return[
+   CX+radius*Math.cos(r),
+   CY+radius*Math.sin(r)
  ];
 
 }
@@ -440,95 +474,93 @@ function polar(radius,angle){
 
 function pathPoint(index){
 
- index=((index%TOTAL_CELLS)+TOTAL_CELLS)%TOTAL_CELLS;
+ index=((index%CELLS)+CELLS)%CELLS;
 
- const angle=index*360/TOTAL_CELLS;
-
- return polar(PATH_RADIUS,angle);
+ return polar(PATH_R,index*360/CELLS);
 
 }
 
 
-/* =====================================
+/* ==========================================
    HOME AREAS
-   ===================================== */
+   ========================================== */
 
-players.forEach((player,i)=>{
+players.forEach((p,i)=>{
 
  const angle=homeAngles[i];
 
- const left=polar(430,angle-24);
- const right=polar(430,angle+24);
+ const a=polar(435,angle-24);
+ const b=polar(435,angle+24);
 
- const polygon=create("polygon",{
+ const home=el("polygon",{
    points:
-   `${CX},${CY} ${left[0]},${left[1]} ${right[0]},${right[1]}`,
-   fill:player.color,
-   opacity:"0.9",
+   `${CX},${CY} ${a[0]},${a[1]} ${b[0]},${b[1]}`,
+   fill:p.color,
+   opacity:"0.88",
    stroke:"#07131d",
-   "stroke-width":"6"
+   "stroke-width":"7"
  });
 
- homes.appendChild(polygon);
+ homes.appendChild(home);
 
 
- /* HOME CIRCLE */
+ /* INNER HOME */
 
- const center=polar(365,angle);
+ const c=polar(386,angle);
 
- const circle=create("circle",{
-   cx:center[0],
-   cy:center[1],
+ const homeCircle=el("circle",{
+   cx:c[0],
+   cy:c[1],
    r:72,
-   fill:"#06131d",
-   stroke:"#ffffff40",
-   "stroke-width":"3"
+   fill:"#03101a",
+   stroke:"#ffffff35",
+   "stroke-width":"4"
  });
 
- homes.appendChild(circle);
+ homes.appendChild(homeCircle);
 
 
- /* PLAYER NAME */
+ /* HOME LABEL */
 
- const text=create("text",{
-   x:center[0],
-   y:center[1]-90,
+ const label=el("text",{
+   x:c[0],
+   y:c[1]-92,
    fill:"#fff",
    "font-size":"21",
    "font-weight":"900",
    "text-anchor":"middle"
  });
 
- text.textContent=player.name;
+ label.textContent=p.name;
 
- homes.appendChild(text);
+ homes.appendChild(label);
 
 });
 
 
-/* =====================================
-   CIRCULAR TRACK
-   ===================================== */
+/* ==========================================
+   TRACK CELLS
+   ========================================== */
 
-for(let i=0;i<TOTAL_CELLS;i++){
+for(let i=0;i<CELLS;i++){
 
- const [x,y]=pathPoint(i);
+ const pos=pathPoint(i);
 
- let color="#dce6eb";
+ const playerIndex=starts.indexOf(i);
 
- const startPlayer=starts.indexOf(i);
+ let fill="#edf3f5";
 
- if(startPlayer!==-1){
-   color=players[startPlayer].color;
+ if(playerIndex!==-1){
+   fill=players[playerIndex].color;
  }
 
- const cell=create("rect",{
-   x:x-18,
-   y:y-18,
-   width:36,
-   height:36,
+ const cell=el("rect",{
+   x:pos[0]-17,
+   y:pos[1]-17,
+   width:34,
+   height:34,
    rx:7,
-   fill:color,
+   fill:fill,
    class:"cell"
  });
 
@@ -537,19 +569,29 @@ for(let i=0;i<TOTAL_CELLS;i++){
 }
 
 
-/* =====================================
-   SAFE STARS
-   ===================================== */
+/* ==========================================
+   12 SAFE STARS
+   ========================================== */
+
+const safe=[];
+
+for(let i=0;i<6;i++){
+
+ safe.push(starts[i]);
+
+ safe.push((starts[i]+6)%CELLS);
+
+}
 
 safe.forEach(index=>{
 
- const [x,y]=pathPoint(index);
+ const pos=pathPoint(index);
 
- const star=create("text",{
-   x:x,
-   y:y+8,
+ const star=el("text",{
+   x:pos[0],
+   y:pos[1]+8,
    fill:"#ffd84d",
-   "font-size":"26",
+   "font-size":"25",
    "font-weight":"900",
    "text-anchor":"middle",
    "pointer-events":"none"
@@ -562,29 +604,67 @@ safe.forEach(index=>{
 });
 
 
-/* =====================================
-   HOME TOKEN LOCATIONS
-   ===================================== */
+/* ==========================================
+   COLORED HOME LANES
+   ========================================== */
+
+players.forEach((p,i)=>{
+
+ const angle=homeAngles[i];
+
+ for(let step=0;step<6;step++){
+
+   const radius=285-(step*28);
+
+   const pos=polar(radius,angle);
+
+   const cell=el("rect",{
+     x:pos[0]-16,
+     y:pos[1]-16,
+     width:32,
+     height:32,
+     rx:6,
+     fill:p.color,
+     opacity:.9,
+     stroke:"#07131d",
+     "stroke-width":2
+   });
+
+   lanes.appendChild(cell);
+
+ }
+
+});
+
+
+/* ==========================================
+   TOKEN HOME POSITIONS
+   ========================================== */
 
 const homePositions={};
 
-players.forEach((player,i)=>{
+players.forEach((p,i)=>{
 
- const center=polar(365,homeAngles[i]);
+ const center=polar(386,homeAngles[i]);
 
- homePositions[player.id]=[
-   [center[0]-27,center[1]-27],
-   [center[0]+27,center[1]-27],
-   [center[0]-27,center[1]+27],
-   [center[0]+27,center[1]+27]
+ homePositions[p.id]=[
+
+   [center[0]-28,center[1]-28],
+
+   [center[0]+28,center[1]-28],
+
+   [center[0]-28,center[1]+28],
+
+   [center[0]+28,center[1]+28]
+
  ];
 
 });
 
 
-/* =====================================
-   TOKEN DATA
-   ===================================== */
+/* ==========================================
+   TOKENS
+   ========================================== */
 
 const tokens=[];
 
@@ -613,13 +693,9 @@ for(let p=0;p<6;p++){
 }
 
 
-/*
- -1  = BASE
- 0-71 = CIRCULAR TRACK
- 72-77 = HOME LANE
- 78 = FINISHED
-*/
-
+/* ==========================================
+   POSITION
+   ========================================== */
 
 function globalPosition(token){
 
@@ -627,14 +703,12 @@ function globalPosition(token){
 
  if(token.progress>=72)return null;
 
- return (starts[token.player]+token.progress)%TOTAL_CELLS;
+ return(
+   starts[token.player]+token.progress
+ )%CELLS;
 
 }
 
-
-/* =====================================
-   TOKEN POSITION
-   ===================================== */
 
 function tokenPosition(token){
 
@@ -651,9 +725,7 @@ function tokenPosition(token){
 
    const lane=token.progress-72;
 
-   const radius=285-(lane*28);
-
-   return polar(radius,angle);
+   return polar(285-lane*28,angle);
 
  }
 
@@ -663,9 +735,9 @@ function tokenPosition(token){
 }
 
 
-/* =====================================
-   DRAW TOKENS
-   ===================================== */
+/* ==========================================
+   DRAW TOKEN
+   ========================================== */
 
 function drawTokens(){
 
@@ -673,13 +745,14 @@ function drawTokens(){
 
  tokens.forEach(token=>{
 
-   const player=players[token.player];
+   const p=players[token.player];
 
    const pos=tokenPosition(token);
 
-   const group=create("g",{
+   const group=el("g",{
      class:"token",
-     transform:`translate(${pos[0]},${pos[1]})`
+     transform:
+     `translate(${pos[0]},${pos[1]})`
    });
 
 
@@ -688,50 +761,42 @@ function drawTokens(){
    }
 
 
-   /* SHADOW */
-
-   const shadow=create("circle",{
-     cx:"3",
-     cy:"5",
-     r:"14",
+   const shadow=el("circle",{
+     cx:3,
+     cy:5,
+     r:15,
      fill:"#000",
-     opacity:"0.45"
+     opacity:.55
    });
 
 
-   /* OUTER RING */
-
-   const outer=create("circle",{
-     cx:"0",
-     cy:"0",
-     r:"14",
-     fill:player.gradient,
-     stroke:"#06131d",
-     "stroke-width":"2"
+   const outer=el("circle",{
+     cx:0,
+     cy:0,
+     r:14,
+     fill:p.gradient,
+     stroke:"#07131d",
+     "stroke-width":2
    });
 
 
-   /* INNER RING */
-
-   const ring=create("circle",{
-     cx:"0",
-     cy:"0",
-     r:"10",
+   const ring=el("circle",{
+     cx:0,
+     cy:0,
+     r:10,
      fill:"none",
-     stroke:"#ffffff",
-     "stroke-width":"1.5",
-     opacity:"0.5"
+     stroke:"#fff",
+     "stroke-width":1.5,
+     opacity:.5
    });
 
 
-   /* SHINE */
-
-   const shine=create("circle",{
-     cx:"-4",
-     cy:"-5",
-     r:"3",
+   const shine=el("circle",{
+     cx:-4,
+     cy:-5,
+     r:3,
      fill:"#fff",
-     opacity:"0.65"
+     opacity:.7
    });
 
 
@@ -759,9 +824,9 @@ function drawTokens(){
 }
 
 
-/* =====================================
-   TURN
-   ===================================== */
+/* ==========================================
+   GAME
+   ========================================== */
 
 let currentPlayer=0;
 
@@ -790,29 +855,27 @@ function teamFinished(team){
 }
 
 
-function controllablePlayers(player){
+function controllable(player){
 
- const list=[player];
+ const result=[player];
 
  if(ownFinished(player)){
-   list.push(partner[player]);
+   result.push(partner[player]);
  }
 
- return list;
+ return result;
 
 }
 
-
-/* =====================================
-   MOVE CHECK
-   ===================================== */
 
 function canMove(token,roll){
 
  if(token.finished)return false;
 
  if(token.progress===-1){
+
    return roll===6;
+
  }
 
  return token.progress+roll<=78;
@@ -826,71 +889,63 @@ function selectable(token){
 
  if(diceValue===0)return false;
 
- if(!controllablePlayers(currentPlayer).includes(token.player)){
+ if(!controllable(currentPlayer).includes(token.player))
    return false;
- }
 
  return canMove(token,diceValue);
 
 }
 
 
-/* =====================================
+/* ==========================================
    DICE
-   ===================================== */
+   ========================================== */
 
-function showDice(number){
+function showDice(n){
 
  pips.innerHTML="";
 
- const pattern={
+ const patterns={
 
  1:[[0,0]],
 
- 2:[
-   [-20,-20],
-   [20,20]
- ],
+ 2:[[-18,-18],[18,18]],
 
- 3:[
-   [-20,-20],
-   [0,0],
-   [20,20]
- ],
+ 3:[[-18,-18],[0,0],[18,18]],
 
  4:[
-   [-20,-20],
-   [20,-20],
-   [-20,20],
-   [20,20]
+ [-18,-18],
+ [18,-18],
+ [-18,18],
+ [18,18]
  ],
 
  5:[
-   [-20,-20],
-   [20,-20],
-   [0,0],
-   [-20,20],
-   [20,20]
+ [-18,-18],
+ [18,-18],
+ [0,0],
+ [-18,18],
+ [18,18]
  ],
 
  6:[
-   [-20,-22],
-   [20,-22],
-   [-20,0],
-   [20,0],
-   [-20,22],
-   [20,22]
+ [-18,-20],
+ [18,-20],
+ [-18,0],
+ [18,0],
+ [-18,20],
+ [18,20]
  ]
 
  };
 
 
- pattern[number].forEach(point=>{
+ patterns[n].forEach(pt=>{
 
-   const pip=create("circle",{
-     cx:point[0],
-     cy:point[1],
-     r:"6",
+   const pip=el("circle",{
+     cx:pt[0],
+     cy:pt[1],
+     r:5.5,
      fill:"#fff"
    });
 
@@ -904,9 +959,9 @@ function showDice(number){
 showDice(1);
 
 
-/* =====================================
-   ROLL
-   ===================================== */
+/* ==========================================
+   ROLL DICE
+   ========================================== */
 
 dice.addEventListener("click",rollDice);
 
@@ -921,19 +976,20 @@ function rollDice(){
 
  let count=0;
 
- const animation=setInterval(()=>{
+ const timer=setInterval(()=>{
 
-   const random=1+Math.floor(Math.random()*6);
-
-   showDice(random);
+   showDice(
+     1+Math.floor(Math.random()*6)
+   );
 
    count++;
 
-   if(count>=10){
+   if(count>=9){
 
-     clearInterval(animation);
+     clearInterval(timer);
 
-     diceValue=1+Math.floor(Math.random()*6);
+     diceValue=
+       1+Math.floor(Math.random()*6);
 
      showDice(diceValue);
 
@@ -943,45 +999,48 @@ function rollDice(){
 
    }
 
- },70);
+ },75);
 
 }
 
 
-/* =====================================
+/* ==========================================
    AFTER ROLL
-   ===================================== */
+   ========================================== */
 
 function afterRoll(){
 
- const possible=tokens.some(t=>selectable(t));
-
  drawTokens();
+
+ const possible=tokens.some(
+   token=>selectable(token)
+ );
 
 
  if(!possible){
 
    showMessage(
      diceValue===6
-     ?"6 आया — कोई चाल नहीं"
+     ?"6 आया • कोई चाल नहीं"
      :"कोई चाल उपलब्ध नहीं"
    );
 
 
    setTimeout(()=>{
 
-     if(diceValue!==6){
+     if(diceValue===6){
 
-       nextTurn();
+       diceValue=0;
+
+       updateTurn();
 
      }else{
 
-       diceValue=0;
-       updateTurn();
+       nextTurn();
 
      }
 
-   },800);
+   },850);
 
    return;
 
@@ -997,9 +1056,9 @@ function afterRoll(){
 }
 
 
-/* =====================================
-   MOVE TOKEN
-   ===================================== */
+/* ==========================================
+   MOVE
+   ========================================== */
 
 function moveToken(token){
 
@@ -1007,8 +1066,6 @@ function moveToken(token){
 
  if(!canMove(token,roll))return;
 
-
- /* BASE TO START */
 
  if(token.progress===-1){
 
@@ -1021,8 +1078,6 @@ function moveToken(token){
  }
 
 
- /* FINISH */
-
  if(token.progress===78){
 
    token.finished=true;
@@ -1030,23 +1085,17 @@ function moveToken(token){
  }
 
 
- /* CAPTURE */
-
  capture(token);
 
-
  drawTokens();
-
 
  diceValue=0;
 
 
- /* TEAM WIN */
-
  if(teamFinished(players[currentPlayer].team)){
 
    showMessage(
-     "🏆 TEAM "+(players[currentPlayer].team+1)+" WINS!"
+     "🏆 TEAM "+(players[currentPlayer].team+1)+" WINS"
    );
 
    updateTurn("🏆 Team जीत गई");
@@ -1055,8 +1104,6 @@ function moveToken(token){
 
  }
 
-
- /* SIX = EXTRA TURN */
 
  if(roll===6){
 
@@ -1079,17 +1126,17 @@ function moveToken(token){
 }
 
 
-/* =====================================
+/* ==========================================
    CAPTURE
-   ===================================== */
+   ========================================== */
 
 function capture(moved){
 
- const position=globalPosition(moved);
+ const pos=globalPosition(moved);
 
- if(position===null)return;
+ if(pos===null)return;
 
- if(safe.includes(position))return;
+ if(safe.includes(pos))return;
 
 
  tokens.forEach(other=>{
@@ -1103,17 +1150,19 @@ function capture(moved){
    if(other.progress>=72)return;
 
 
-   /* PARTNER को नहीं काटना */
+   /* PARTNER SAFE */
 
    if(
      players[other.player].team===
      players[moved.player].team
    ){
+
      return;
+
    }
 
 
-   if(globalPosition(other)===position){
+   if(globalPosition(other)===pos){
 
      other.progress=-1;
 
@@ -1128,9 +1177,9 @@ function capture(moved){
 }
 
 
-/* =====================================
-   NEXT TURN
-   ===================================== */
+/* ==========================================
+   NEXT PLAYER
+   ========================================== */
 
 function nextTurn(){
 
@@ -1139,32 +1188,35 @@ function nextTurn(){
  currentPlayer++;
 
  if(currentPlayer>=6){
+
    currentPlayer=0;
+
  }
 
- updateTurn();
-
  drawTokens();
+
+ updateTurn();
 
 }
 
 
-/* =====================================
-   TURN TEXT
-   ===================================== */
+/* ==========================================
+   TURN DISPLAY
+   ========================================== */
 
 function updateTurn(custom){
 
- const player=players[currentPlayer];
+ const p=players[currentPlayer];
 
  let text=
    custom ||
-   player.name+" की बारी • Dice दबाएँ";
+   p.name+" की बारी • Dice दबाएँ";
 
 
  if(ownFinished(currentPlayer)){
 
-   text+=" • Partner "+
+   text+=
+   " • Partner "+
    players[partner[currentPlayer]].name+
    " unlocked";
 
@@ -1176,11 +1228,11 @@ function updateTurn(custom){
 }
 
 
-/* =====================================
+/* ==========================================
    MESSAGE
-   ===================================== */
+   ========================================== */
 
-let noticeTimer=null;
+let noticeTimer;
 
 
 function showMessage(text){
@@ -1191,11 +1243,10 @@ function showMessage(text){
 
  clearTimeout(noticeTimer);
 
- noticeTimer=setTimeout(()=>{
-
-   hideMessage();
-
- },900);
+ noticeTimer=setTimeout(
+   hideMessage,
+   900
+ );
 
 }
 
@@ -1207,16 +1258,16 @@ function hideMessage(){
 }
 
 
-/* =====================================
+/* ==========================================
    START
-   ===================================== */
+   ========================================== */
 
 drawTokens();
 
 updateTurn();
 
 
-/* RESET FOR TESTING */
+/* RESET */
 
 window.BHAICHARA_RESET=function(){
 
