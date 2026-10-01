@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
 <title>BHAICHARA</title>
 
 <style>
 *{
+  box-sizing:border-box;
   margin:0;
   padding:0;
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
 }
 
 html,body{
@@ -18,16 +20,16 @@ html,body{
   height:100%;
   overflow:hidden;
   background:#02070d;
-  font-family:Arial,sans-serif;
+  font-family:Arial,Helvetica,sans-serif;
 }
 
-#game{
-  position:relative;
+#app{
   width:100vw;
   height:100vh;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
+  position:relative;
 }
 
 canvas{
@@ -36,55 +38,55 @@ canvas{
   height:min(100vw,100vh);
 }
 
-.logo{
+.title{
   position:absolute;
-  top:12px;
+  top:10px;
   left:18px;
-  z-index:5;
-  color:white;
-  font-size:clamp(20px,4vw,34px);
+  color:#fff;
+  font-size:clamp(22px,4vw,36px);
   font-weight:900;
   letter-spacing:3px;
-  text-shadow:0 3px 10px #000;
+  z-index:10;
+  text-shadow:0 3px 8px #000;
 }
 
 .online{
   position:absolute;
-  right:15px;
-  top:13px;
-  z-index:5;
-  color:#48ff9b;
-  border:1px solid #48ff9b;
-  border-radius:30px;
+  top:12px;
+  right:16px;
+  color:#50ff9d;
+  border:1px solid #50ff9d;
+  border-radius:25px;
   padding:7px 14px;
-  background:#06130de8;
-  font-size:12px;
+  font-size:13px;
   font-weight:bold;
+  background:#06130de8;
+  z-index:10;
 }
 
-.dot{
+.online i{
   display:inline-block;
-  width:7px;
-  height:7px;
-  background:#48ff9b;
+  width:8px;
+  height:8px;
   border-radius:50%;
+  background:#50ff9d;
+  box-shadow:0 0 9px #50ff9d;
   margin-right:5px;
-  box-shadow:0 0 9px #48ff9b;
 }
 
-.info{
+.status{
   position:absolute;
-  bottom:10px;
+  bottom:8px;
   left:50%;
   transform:translateX(-50%);
-  z-index:5;
-  color:#fff;
-  background:#050b11e8;
+  color:white;
+  background:#050b11ed;
   border:1px solid #ffffff30;
   border-radius:20px;
-  padding:8px 17px;
+  padding:8px 18px;
   font-size:12px;
   font-weight:bold;
+  z-index:10;
   white-space:nowrap;
 }
 </style>
@@ -92,17 +94,17 @@ canvas{
 
 <body>
 
-<div id="game">
+<div id="app">
 
 <canvas id="board"></canvas>
 
-<div class="logo">BHAICHARA</div>
+<div class="title">BHAICHARA</div>
 
 <div class="online">
-  <span class="dot"></span>ONLINE
+  <i></i>ONLINE
 </div>
 
-<div class="info" id="info">
+<div class="status" id="status">
   P1 की बारी • Dice दबाएँ
 </div>
 
@@ -112,77 +114,110 @@ canvas{
 
 const canvas=document.getElementById("board");
 const ctx=canvas.getContext("2d");
-const info=document.getElementById("info");
 
-let size=0;
-let cx=0;
-let cy=0;
-let dice=1;
-let rolling=false;
+let W=0;
+let H=0;
+let S=0;
+let CX=0;
+let CY=0;
 
-const players=[
-  {id:"P1",color:"#0879ed",light:"#35a7ff",angle:300},
-  {id:"P2",color:"#f0c400",light:"#ffe85b",angle:240},
-  {id:"P3",color:"#8629c7",light:"#b95aff",angle:180},
-  {id:"P4",color:"#e5292f",light:"#ff656a",angle:120},
-  {id:"P5",color:"#08aa55",light:"#39df80",angle:60},
-  {id:"P6",color:"#ee7117",light:"#ff9b48",angle:0}
+const COLORS=[
+  {
+    id:"P1",
+    color:"#087BEF",
+    light:"#45B5FF",
+    dark:"#034B9A",
+    angle:-30
+  },
+  {
+    id:"P2",
+    color:"#F0C400",
+    light:"#FFE45A",
+    dark:"#A57E00",
+    angle:-90
+  },
+  {
+    id:"P3",
+    color:"#8526C7",
+    light:"#C15BFF",
+    dark:"#50157D",
+    angle:-150
+  },
+  {
+    id:"P4",
+    color:"#E52C32",
+    light:"#FF686D",
+    dark:"#8D161B",
+    angle:150
+  },
+  {
+    id:"P5",
+    color:"#0AA956",
+    light:"#45E681",
+    dark:"#056A37",
+    angle:90
+  },
+  {
+    id:"P6",
+    color:"#EF7418",
+    light:"#FFAA5C",
+    dark:"#98460C",
+    angle:30
+  }
 ];
-
-/* ---------------- RESIZE ---------------- */
 
 function resize(){
 
-  size=Math.min(window.innerWidth,window.innerHeight);
+  const dpr=Math.min(window.devicePixelRatio||1,2);
 
-  const dpr=Math.min(devicePixelRatio||1,2);
+  S=Math.min(window.innerWidth,window.innerHeight);
 
-  canvas.width=size*dpr;
-  canvas.height=size*dpr;
+  W=S;
+  H=S;
 
-  canvas.style.width=size+"px";
-  canvas.style.height=size+"px";
+  canvas.width=S*dpr;
+  canvas.height=S*dpr;
+
+  canvas.style.width=S+"px";
+  canvas.style.height=S+"px";
 
   ctx.setTransform(dpr,0,0,dpr,0,0);
 
-  cx=size/2;
-  cy=size/2;
+  CX=S/2;
+  CY=S/2;
 
   draw();
 }
 
 window.addEventListener("resize",resize);
 
-/* ---------------- HELPERS ---------------- */
 
-function R(deg){
+/* =========================
+   BASIC HELPERS
+========================= */
+
+function rad(deg){
   return deg*Math.PI/180;
 }
 
-function pos(radius,angle){
+function point(r,a){
 
-  const a=R(angle-90);
+  const t=rad(a-90);
 
   return {
-    x:cx+Math.cos(a)*radius,
-    y:cy+Math.sin(a)*radius
+    x:CX+Math.cos(t)*r,
+    y:CY+Math.sin(t)*r
   };
 }
 
-function hex(x,y,r,fill,stroke,lw){
+function polygon(points,fill,stroke="#07131d",lw=2){
 
   ctx.beginPath();
 
-  for(let i=0;i<6;i++){
-
-    const a=R(i*60-30);
-
-    const px=x+Math.cos(a)*r;
-    const py=y+Math.sin(a)*r;
-
-    if(i===0)ctx.moveTo(px,py);
-    else ctx.lineTo(px,py);
-  }
+  points.forEach((p,i)=>{
+    if(i===0)ctx.moveTo(p.x,p.y);
+    else ctx.lineTo(p.x,p.y);
+  });
 
   ctx.closePath();
 
@@ -196,215 +231,288 @@ function hex(x,y,r,fill,stroke,lw){
   }
 }
 
-/* ---------------- BACKGROUND ---------------- */
+function roundRect(x,y,w,h,r,fill,stroke){
 
-function background(){
+  ctx.beginPath();
 
-  const g=ctx.createRadialGradient(
-    cx,cy,size*.05,
-    cx,cy,size*.75
-  );
+  ctx.roundRect(x,y,w,h,r);
 
-  g.addColorStop(0,"#102c3b");
-  g.addColorStop(.5,"#06141e");
-  g.addColorStop(1,"#010509");
+  ctx.fillStyle=fill;
+  ctx.fill();
 
-  ctx.fillStyle=g;
-  ctx.fillRect(0,0,size,size);
-
-  /* subtle rings */
-
-  for(let i=1;i<=5;i++){
-
-    ctx.beginPath();
-
-    ctx.arc(
-      cx,
-      cy,
-      size*(.46-i*.012),
-      0,
-      Math.PI*2
-    );
-
-    ctx.strokeStyle="rgba(70,130,160,.08)";
+  if(stroke){
+    ctx.strokeStyle=stroke;
     ctx.lineWidth=1;
     ctx.stroke();
   }
 }
 
-/* ---------------- GOLD FRAME ---------------- */
 
-function frame(){
+/* =========================
+   BACKGROUND
+========================= */
 
-  const r=size*.455;
+function background(){
+
+  const g=ctx.createRadialGradient(
+    CX,CY,S*.08,
+    CX,CY,S*.72
+  );
+
+  g.addColorStop(0,"#102b3a");
+  g.addColorStop(.55,"#071722");
+  g.addColorStop(1,"#010509");
+
+  ctx.fillStyle=g;
+  ctx.fillRect(0,0,S,S);
+
+  /* subtle pattern */
+
+  ctx.globalAlpha=.12;
+
+  for(let x=0;x<S;x+=35){
+
+    for(let y=0;y<S;y+=35){
+
+      ctx.beginPath();
+
+      ctx.arc(x,y,1,0,Math.PI*2);
+
+      ctx.fillStyle="#77A0B8";
+      ctx.fill();
+    }
+  }
+
+  ctx.globalAlpha=1;
+}
+
+
+/* =========================
+   OUTER BOARD
+========================= */
+
+function outerBoard(){
+
+  const r=S*.465;
 
   ctx.save();
 
   ctx.shadowColor="#000";
-  ctx.shadowBlur=size*.025;
-
-  const gold=ctx.createLinearGradient(
-    cx-r,cy-r,
-    cx+r,cy+r
-  );
-
-  gold.addColorStop(0,"#81520f");
-  gold.addColorStop(.25,"#e4a62b");
-  gold.addColorStop(.5,"#ffe98a");
-  gold.addColorStop(.72,"#d28c1d");
-  gold.addColorStop(1,"#75460d");
+  ctx.shadowBlur=S*.025;
 
   ctx.beginPath();
-  ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.arc(CX,CY,r,0,Math.PI*2);
 
   ctx.fillStyle="#07141e";
   ctx.fill();
 
+  const gold=ctx.createLinearGradient(
+    CX-r,CY-r,
+    CX+r,CY+r
+  );
+
+  gold.addColorStop(0,"#6f430b");
+  gold.addColorStop(.2,"#e5a52a");
+  gold.addColorStop(.48,"#ffe88a");
+  gold.addColorStop(.7,"#d18c1b");
+  gold.addColorStop(1,"#71440b");
+
   ctx.strokeStyle=gold;
-  ctx.lineWidth=size*.014;
+  ctx.lineWidth=S*.014;
   ctx.stroke();
 
   ctx.restore();
 
   ctx.beginPath();
-  ctx.arc(cx,cy,r*.95,0,Math.PI*2);
+  ctx.arc(CX,CY,r*.95,0,Math.PI*2);
 
-  ctx.strokeStyle="#34586c";
-  ctx.lineWidth=size*.005;
+  ctx.strokeStyle="#35596d";
+  ctx.lineWidth=S*.005;
   ctx.stroke();
 }
 
-/* ---------------- SIX HOME ZONES ---------------- */
 
-function home(player){
+/* =========================
+   SIX HOME AREAS
+========================= */
 
-  const outer=size*.405;
-  const inner=size*.115;
-  const width=27;
+function homeArea(player){
 
-  const p1=pos(inner,player.angle-width);
-  const p2=pos(outer,player.angle-width);
-  const p3=pos(outer,player.angle+width);
-  const p4=pos(inner,player.angle+width);
+  const outer=S*.395;
+  const inner=S*.115;
 
-  const gradient=ctx.createLinearGradient(
+  const spread=27;
+
+  const p1=point(inner,player.angle-spread);
+  const p2=point(outer,player.angle-spread);
+  const p3=point(outer,player.angle+spread);
+  const p4=point(inner,player.angle+spread);
+
+  const grad=ctx.createLinearGradient(
     p2.x,p2.y,
     p3.x,p3.y
   );
 
-  gradient.addColorStop(0,player.light);
-  gradient.addColorStop(.5,player.color);
-  gradient.addColorStop(1,"#101820");
+  grad.addColorStop(0,player.light);
+  grad.addColorStop(.48,player.color);
+  grad.addColorStop(1,player.dark);
 
-  ctx.beginPath();
+  polygon(
+    [p1,p2,p3,p4],
+    grad,
+    "#061019",
+    S*.006
+  );
 
-  ctx.moveTo(p1.x,p1.y);
-  ctx.lineTo(p2.x,p2.y);
-  ctx.lineTo(p3.x,p3.y);
-  ctx.lineTo(p4.x,p4.y);
-  ctx.closePath();
+  /* inner highlight */
 
-  ctx.fillStyle=gradient;
-  ctx.fill();
+  const q1=point(S*.135,player.angle-spread+3);
+  const q2=point(S*.365,player.angle-spread+3);
+  const q3=point(S*.365,player.angle+spread-3);
+  const q4=point(S*.135,player.angle+spread-3);
 
-  ctx.strokeStyle="#061019";
-  ctx.lineWidth=size*.006;
-  ctx.stroke();
-
-  /* inner shadow */
-
-  const q1=pos(size*.14,player.angle-width+3);
-  const q2=pos(size*.375,player.angle-width+3);
-  const q3=pos(size*.375,player.angle+width-3);
-  const q4=pos(size*.14,player.angle+width-3);
-
-  ctx.beginPath();
-
-  ctx.moveTo(q1.x,q1.y);
-  ctx.lineTo(q2.x,q2.y);
-  ctx.lineTo(q3.x,q3.y);
-  ctx.lineTo(q4.x,q4.y);
-  ctx.closePath();
-
-  ctx.fillStyle=player.color;
-  ctx.globalAlpha=.78;
-  ctx.fill();
-  ctx.globalAlpha=1;
-}
-
-/* ---------------- TRACK ---------------- */
-
-const TRACK=72;
-
-function trackPosition(index){
-
-  return pos(
-    size*.305,
-    -90+index*(360/TRACK)+90
+  polygon(
+    [q1,q2,q3,q4],
+    player.color,
+    "#ffffff15",
+    1
   );
 }
 
-function drawTrack(){
 
-  const cell=size*.034;
+/* =========================
+   HOME LANES
+========================= */
 
-  for(let i=0;i<TRACK;i++){
+function homeLane(player){
 
-    const p=trackPosition(i);
+  /*
+     6 colored cells running
+     from home towards center
+  */
 
-    let player=-1;
+  for(let i=1;i<=6;i++){
 
-    for(let j=0;j<6;j++){
+    const r=S*.265-i*S*.026;
 
-      if(i===j*12)
-        player=j;
-    }
+    const p=point(r,player.angle);
 
-    ctx.beginPath();
+    const cell=S*.027;
 
-    ctx.roundRect(
+    roundRect(
       p.x-cell/2,
       p.y-cell/2,
       cell,
       cell,
-      cell*.12
+      cell*.12,
+      player.color,
+      "#07131d"
+    );
+  }
+}
+
+
+/* =========================
+   TRACK
+========================= */
+
+const TRACK_COUNT=72;
+
+function trackPoint(index){
+
+  /*
+    Hexagon-like circular route.
+    This makes the path look like
+    the reference rather than a
+    perfect circle.
+  */
+
+  const side=index%12;
+
+  const section=Math.floor(index/12);
+
+  const a1=section*60-30;
+  const a2=a1+60;
+
+  const t=side/12;
+
+  const p1=point(S*.335,a1);
+  const p2=point(S*.335,a2);
+
+  return {
+    x:p1.x+(p2.x-p1.x)*t,
+    y:p1.y+(p2.y-p1.y)*t
+  };
+}
+
+
+/* =========================
+   TRACK CELLS
+========================= */
+
+function drawTrack(){
+
+  const cell=S*.031;
+
+  for(let i=0;i<TRACK_COUNT;i++){
+
+    const p=trackPoint(i);
+
+    let startPlayer=-1;
+
+    for(let j=0;j<6;j++){
+
+      if(i===j*12){
+        startPlayer=j;
+        break;
+      }
+    }
+
+    let fill="#F2F6F7";
+
+    if(startPlayer>=0){
+      fill=COLORS[startPlayer].color;
+    }
+
+    roundRect(
+      p.x-cell/2,
+      p.y-cell/2,
+      cell,
+      cell,
+      cell*.15,
+      fill,
+      "#25343D"
     );
 
-    ctx.fillStyle=
-      player>=0
-      ? players[player].color
-      : "#eef3f5";
-
-    ctx.fill();
-
-    ctx.strokeStyle="#1b2b34";
-    ctx.lineWidth=size*.0015;
-    ctx.stroke();
-
-    if(player<0){
+    if(startPlayer<0){
 
       ctx.beginPath();
 
       ctx.moveTo(
-        p.x-cell*.28,
-        p.y-cell*.27
+        p.x-cell*.25,
+        p.y-cell*.25
       );
 
       ctx.lineTo(
         p.x+cell*.25,
-        p.y-cell*.27
+        p.y-cell*.25
       );
 
-      ctx.strokeStyle="rgba(255,255,255,.45)";
+      ctx.strokeStyle="#ffffff";
+      ctx.globalAlpha=.35;
       ctx.lineWidth=1;
       ctx.stroke();
+      ctx.globalAlpha=1;
     }
   }
 }
 
-/* ---------------- SAFE STARS ---------------- */
 
-function star(x,y,r){
+/* =========================
+   STARS
+========================= */
+
+function drawStar(x,y,r){
 
   ctx.save();
 
@@ -414,21 +522,24 @@ function star(x,y,r){
 
   for(let i=0;i<10;i++){
 
-    const rr=i%2===0?r:r*.42;
+    const rr=i%2===0?r:r*.43;
+
     const a=-Math.PI/2+i*Math.PI/5;
 
     const px=Math.cos(a)*rr;
     const py=Math.sin(a)*rr;
 
-    if(i===0)ctx.moveTo(px,py);
-    else ctx.lineTo(px,py);
+    if(i===0)
+      ctx.moveTo(px,py);
+    else
+      ctx.lineTo(px,py);
   }
 
   ctx.closePath();
 
-  ctx.fillStyle="#ffd83d";
-  ctx.shadowColor="#ffd83d";
-  ctx.shadowBlur=r*.7;
+  ctx.fillStyle="#FFD83D";
+  ctx.shadowColor="#FFD83D";
+  ctx.shadowBlur=r*.8;
   ctx.fill();
 
   ctx.restore();
@@ -436,78 +547,62 @@ function star(x,y,r){
 
 function safeSpots(){
 
+  /*
+     Exactly 12 stars.
+     Two per player.
+  */
+
   for(let p=0;p<6;p++){
 
-    [p*12,p*12+6].forEach(index=>{
+    [p*12+3,p*12+9].forEach(index=>{
 
-      const q=trackPosition(index);
+      const q=trackPoint(index);
 
-      star(q.x,q.y,size*.012);
+      drawStar(
+        q.x,
+        q.y,
+        S*.010
+      );
     });
   }
 }
 
-/* ---------------- HOME LANES ---------------- */
 
-function lanes(){
-
-  players.forEach(player=>{
-
-    for(let i=1;i<=6;i++){
-
-      const q=pos(
-        size*(.265-i*.024),
-        player.angle
-      );
-
-      const s=size*.031;
-
-      ctx.beginPath();
-
-      ctx.roundRect(
-        q.x-s/2,
-        q.y-s/2,
-        s,
-        s,
-        s*.12
-      );
-
-      ctx.fillStyle=player.color;
-      ctx.fill();
-
-      ctx.strokeStyle="#172630";
-      ctx.lineWidth=1;
-      ctx.stroke();
-    }
-  });
-}
-
-/* ---------------- TOKENS ---------------- */
+/* =========================
+   PLAYER BASE
+========================= */
 
 function token(x,y,player,r){
 
   ctx.save();
 
-  ctx.shadowColor="rgba(0,0,0,.8)";
-  ctx.shadowBlur=r*.8;
-  ctx.shadowOffsetY=r*.4;
+  ctx.shadowColor="#000";
+  ctx.shadowBlur=r*.7;
+  ctx.shadowOffsetY=r*.25;
 
   const g=ctx.createRadialGradient(
-    x-r*.4,
-    y-r*.5,
+    x-r*.35,
+    y-r*.4,
     r*.05,
     x,
     y,
     r
   );
 
-  g.addColorStop(0,"#ffffff");
+  g.addColorStop(0,"#fff");
   g.addColorStop(.12,player.light);
-  g.addColorStop(.52,player.color);
-  g.addColorStop(1,"#101010");
+  g.addColorStop(.55,player.color);
+  g.addColorStop(1,player.dark);
 
   ctx.beginPath();
-  ctx.arc(x,y,r,0,Math.PI*2);
+
+  ctx.arc(
+    x,
+    y,
+    r,
+    0,
+    Math.PI*2
+  );
 
   ctx.fillStyle=g;
   ctx.fill();
@@ -515,295 +610,420 @@ function token(x,y,player,r){
   ctx.restore();
 
   ctx.beginPath();
-  ctx.arc(x,y,r*.65,0,Math.PI*2);
 
-  ctx.strokeStyle="#ffffff";
+  ctx.arc(
+    x,
+    y,
+    r*.65,
+    0,
+    Math.PI*2
+  );
+
+  ctx.strokeStyle="#fff";
   ctx.lineWidth=Math.max(1,r*.09);
   ctx.stroke();
-
-  ctx.beginPath();
-
-  ctx.arc(
-    x-r*.3,
-    y-r*.36,
-    r*.13,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fillStyle="rgba(255,255,255,.7)";
-  ctx.fill();
 }
 
-/* ---------------- PLAYER BASES ---------------- */
 
-function bases(){
+function playerBase(player){
 
-  players.forEach(player=>{
+  const p=point(S*.425,player.angle);
 
-    const p=pos(size*.405,player.angle);
-
-    ctx.save();
-
-    ctx.shadowColor="#000";
-    ctx.shadowBlur=size*.02;
-
-    ctx.beginPath();
-    ctx.arc(
-      p.x,
-      p.y,
-      size*.052,
-      0,
-      Math.PI*2
-    );
-
-    ctx.fillStyle="#061019";
-    ctx.fill();
-
-    ctx.strokeStyle="#ffffff25";
-    ctx.lineWidth=2;
-    ctx.stroke();
-
-    ctx.restore();
-
-    const gap=size*.023;
-
-    token(p.x-gap,p.y-gap,player,size*.021);
-    token(p.x+gap,p.y-gap,player,size*.021);
-    token(p.x-gap,p.y+gap,player,size*.021);
-    token(p.x+gap,p.y+gap,player,size*.021);
-
-    const label=pos(size*.448,player.angle);
-
-    ctx.fillStyle="#fff";
-    ctx.font=`900 ${size*.021}px Arial`;
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
-
-    ctx.fillText(
-      player.id,
-      label.x,
-      label.y
-    );
-  });
-}
-
-/* ---------------- CENTER DICE ---------------- */
-
-function center(){
-
-  const r=size*.095;
-
-  hex(
-    cx,
-    cy,
-    r,
-    "#06121b",
-    "#e8b63d",
-    size*.008
-  );
-
-  hex(
-    cx,
-    cy,
-    r*.78,
-    "#087edc",
-    "#68c9ff",
-    size*.004
-  );
-
-  ctx.beginPath();
-
-  ctx.arc(
-    cx,
-    cy,
-    r*.53,
-    0,
-    Math.PI*2
-  );
-
-  const blue=ctx.createRadialGradient(
-    cx-r*.2,
-    cy-r*.2,
-    r*.05,
-    cx,
-    cy,
-    r*.55
-  );
-
-  blue.addColorStop(0,"#5bc7ff");
-  blue.addColorStop(.45,"#087fe0");
-  blue.addColorStop(1,"#033a71");
-
-  ctx.fillStyle=blue;
-  ctx.fill();
-
-  ctx.strokeStyle="#91ddff";
-  ctx.lineWidth=size*.003;
-  ctx.stroke();
-
-  drawDice();
-}
-
-/* ---------------- DICE ---------------- */
-
-function drawDice(){
-
-  const r=size*.043;
+  const baseR=S*.055;
 
   ctx.save();
 
   ctx.shadowColor="#000";
-  ctx.shadowBlur=size*.012;
-  ctx.shadowOffsetY=size*.006;
+  ctx.shadowBlur=S*.015;
 
   ctx.beginPath();
 
-  ctx.roundRect(
-    cx-r,
-    cy-r,
-    r*2,
-    r*2,
-    r*.18
+  ctx.arc(
+    p.x,
+    p.y,
+    baseR,
+    0,
+    Math.PI*2
   );
 
-  ctx.fillStyle="#f8fafb";
+  ctx.fillStyle="#030a10";
   ctx.fill();
 
-  ctx.strokeStyle="#c7d7df";
+  ctx.strokeStyle="#ffffff25";
   ctx.lineWidth=2;
   ctx.stroke();
 
   ctx.restore();
 
+  const gap=S*.022;
+  const tr=S*.019;
+
+  token(
+    p.x-gap,
+    p.y-gap,
+    player,
+    tr
+  );
+
+  token(
+    p.x+gap,
+    p.y-gap,
+    player,
+    tr
+  );
+
+  token(
+    p.x-gap,
+    p.y+gap,
+    player,
+    tr
+  );
+
+  token(
+    p.x+gap,
+    p.y+gap,
+    player,
+    tr
+  );
+
+  /* player label */
+
+  const label=point(
+    S*.455,
+    player.angle
+  );
+
+  ctx.fillStyle="#fff";
+
+  ctx.font=`900 ${Math.max(12,S*.020)}px Arial`;
+
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+
+  ctx.fillText(
+    player.id,
+    label.x,
+    label.y
+  );
+}
+
+
+/* =========================
+   CENTER
+========================= */
+
+function hexagon(x,y,r,fill,stroke,lw){
+
+  ctx.beginPath();
+
+  for(let i=0;i<6;i++){
+
+    const a=rad(i*60-30);
+
+    const px=x+Math.cos(a)*r;
+    const py=y+Math.sin(a)*r;
+
+    if(i===0)
+      ctx.moveTo(px,py);
+    else
+      ctx.lineTo(px,py);
+  }
+
+  ctx.closePath();
+
+  ctx.fillStyle=fill;
+  ctx.fill();
+
+  ctx.strokeStyle=stroke;
+  ctx.lineWidth=lw;
+  ctx.stroke();
+}
+
+
+function centerDice(){
+
+  const r=S*.095;
+
+  /* black/gold outer */
+
+  hexagon(
+    CX,
+    CY,
+    r,
+    "#050b10",
+    "#F1B83D",
+    S*.007
+  );
+
+  /* blue inner */
+
+  hexagon(
+    CX,
+    CY,
+    r*.78,
+    "#087CDC",
+    "#5EC8FF",
+    S*.004
+  );
+
+  /* blue glow */
+
+  ctx.beginPath();
+
+  ctx.arc(
+    CX,
+    CY,
+    r*.51,
+    0,
+    Math.PI*2
+  );
+
+  const g=ctx.createRadialGradient(
+    CX-r*.15,
+    CY-r*.2,
+    2,
+    CX,
+    CY,
+    r*.55
+  );
+
+  g.addColorStop(0,"#62CFFF");
+  g.addColorStop(.5,"#087EDC");
+  g.addColorStop(1,"#034274");
+
+  ctx.fillStyle=g;
+  ctx.fill();
+
+  ctx.strokeStyle="#9AE1FF";
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  drawDice();
+}
+
+
+/* =========================
+   DICE
+========================= */
+
+let diceValue=6;
+
+function drawDice(){
+
+  const r=S*.042;
+
+  ctx.save();
+
+  ctx.shadowColor="#000";
+  ctx.shadowBlur=S*.012;
+  ctx.shadowOffsetY=S*.006;
+
+  roundRect(
+    CX-r,
+    CY-r,
+    r*2,
+    r*2,
+    r*.18,
+    "#F7F8F8",
+    "#CBD7DB"
+  );
+
+  ctx.restore();
+
   const spots={
     1:[[0,0]],
-    2:[[-.32,-.32],[.32,.32]],
-    3:[[-.32,-.32],[0,0],[.32,.32]],
-    4:[[-.32,-.32],[.32,-.32],[-.32,.32],[.32,.32]],
-    5:[[-.32,-.32],[.32,-.32],[0,0],[-.32,.32],[.32,.32]],
-    6:[[-.32,-.32],[.32,-.32],[-.32,0],[.32,0],[-.32,.32],[.32,.32]]
+
+    2:[
+      [-.32,-.32],
+      [.32,.32]
+    ],
+
+    3:[
+      [-.32,-.32],
+      [0,0],
+      [.32,.32]
+    ],
+
+    4:[
+      [-.32,-.32],
+      [.32,-.32],
+      [-.32,.32],
+      [.32,.32]
+    ],
+
+    5:[
+      [-.32,-.32],
+      [.32,-.32],
+      [0,0],
+      [-.32,.32],
+      [.32,.32]
+    ],
+
+    6:[
+      [-.32,-.32],
+      [.32,-.32],
+      [-.32,0],
+      [.32,0],
+      [-.32,.32],
+      [.32,.32]
+    ]
   };
 
-  spots[dice].forEach(s=>{
+  spots[diceValue].forEach(s=>{
 
     ctx.beginPath();
 
     ctx.arc(
-      cx+s[0]*r*1.4,
-      cy+s[1]*r*1.4,
+      CX+s[0]*r*1.45,
+      CY+s[1]*r*1.45,
       r*.095,
       0,
       Math.PI*2
     );
 
-    ctx.fillStyle="#d31c25";
+    ctx.fillStyle="#D9232E";
     ctx.fill();
   });
 }
 
-/* ---------------- ARROWS ---------------- */
+
+/* =========================
+   ARROWS
+========================= */
+
+function arrowAt(index,player){
+
+  const p=trackPoint(index);
+
+  ctx.save();
+
+  ctx.translate(p.x,p.y);
+
+  ctx.fillStyle=player.color;
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    S*.009,
+    0
+  );
+
+  ctx.lineTo(
+    -S*.008,
+    -S*.006
+  );
+
+  ctx.lineTo(
+    -S*.003,
+    0
+  );
+
+  ctx.lineTo(
+    -S*.008,
+    S*.006
+  );
+
+  ctx.closePath();
+
+  ctx.fill();
+
+  ctx.restore();
+}
 
 function arrows(){
 
-  players.forEach((player,i)=>{
+  for(let i=0;i<6;i++){
 
-    const q=trackPosition(i*12+9);
-
-    ctx.save();
-
-    ctx.translate(q.x,q.y);
-
-    ctx.rotate(R(i*60));
-
-    ctx.fillStyle=player.color;
-
-    ctx.beginPath();
-    ctx.moveTo(size*.012,0);
-    ctx.lineTo(-size*.007,-size*.006);
-    ctx.lineTo(-size*.003,0);
-    ctx.lineTo(-size*.007,size*.006);
-    ctx.closePath();
-
-    ctx.fill();
-
-    ctx.restore();
-  });
+    arrowAt(
+      i*12+6,
+      COLORS[i]
+    );
+  }
 }
 
-/* ---------------- DRAW ---------------- */
+
+/* =========================
+   DRAW EVERYTHING
+========================= */
 
 function draw(){
 
   background();
 
-  frame();
+  outerBoard();
 
-  players.forEach(home);
+  /*
+     Homes first
+  */
+
+  COLORS.forEach(homeArea);
+
+  /*
+     Colored home lanes
+  */
+
+  COLORS.forEach(homeLane);
+
+  /*
+     Main continuous track
+  */
 
   drawTrack();
 
-  lanes();
+  /*
+     Safe stars
+  */
 
   safeSpots();
 
+  /*
+     Direction arrows
+  */
+
   arrows();
 
-  bases();
+  /*
+     Tokens
+  */
 
-  center();
+  COLORS.forEach(playerBase);
+
+  /*
+     Center dice
+  */
+
+  centerDice();
 }
 
-/* ---------------- DICE CLICK ---------------- */
 
-canvas.addEventListener("click",e=>{
+/* =========================
+   DICE CLICK
+========================= */
+
+canvas.addEventListener("click",(e)=>{
 
   const rect=canvas.getBoundingClientRect();
 
   const x=e.clientX-rect.left;
   const y=e.clientY-rect.top;
 
-  const d=Math.hypot(x-cx,y-cy);
+  const distance=Math.hypot(
+    x-CX,
+    y-CY
+  );
 
-  if(d<size*.13){
-    rollDice();
-  }
-});
+  if(distance<S*.12){
 
-/* ---------------- ROLL ---------------- */
-
-function rollDice(){
-
-  if(rolling)return;
-
-  rolling=true;
-
-  let n=0;
-
-  const timer=setInterval(()=>{
-
-    dice=Math.floor(Math.random()*6)+1;
+    diceValue=
+      Math.floor(Math.random()*6)+1;
 
     draw();
 
-    n++;
+    document.getElementById("status").textContent=
+      `P1 की बारी • ${diceValue} आया • Token चुनें`;
+  }
+});
 
-    if(n>=12){
-
-      clearInterval(timer);
-
-      dice=Math.floor(Math.random()*6)+1;
-
-      draw();
-
-      rolling=false;
-
-      info.textContent=
-        `P1 की बारी • ${dice} आया • Token चुनें`;
-    }
-
-  },65);
-}
 
 resize();
 
