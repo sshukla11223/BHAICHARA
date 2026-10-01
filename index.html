@@ -1,333 +1,459 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>BHAICHARA — 6 Player Ludo</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:#101722;
-  font-family:Arial,sans-serif;
-  color:white;
-  overflow:hidden;
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font-family:Arial,sans-serif;background:#090d12;color:white}
+body{display:flex;justify-content:center;align-items:center;overflow:hidden}
+
+.app{
+ width:min(100vw,1100px);
+ height:100vh;
+ display:flex;
+ flex-direction:column;
+ background:
+ radial-gradient(circle at 50% 45%,#182331 0,#080c11 65%);
 }
-.game{
-  width:min(96vw,760px);
-  text-align:center;
-}
+
 .top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:10px;
+ height:72px;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ padding:8px 18px;
+ z-index:10;
+ background:linear-gradient(180deg,#111923dd,#080c12aa);
+ border-bottom:1px solid #ffffff18;
 }
-.logo{
-  font-size:25px;
-  font-weight:900;
-  letter-spacing:2px;
+
+.brand{display:flex;align-items:center;gap:12px}
+.menu{
+ width:48px;height:48px;border-radius:50%;
+ border:2px solid #725b35;background:#0c1118;
+ display:flex;align-items:center;justify-content:center;
+ font-size:28px;box-shadow:0 0 15px #000;
 }
-.status{
-  font-size:12px;
-  background:#162b24;
-  border:1px solid #35d98a;
-  color:#65efad;
-  padding:6px 12px;
-  border-radius:20px;
+.crown{font-size:34px}
+.title{font-size:22px;font-weight:900;letter-spacing:1px}
+.online{font-size:12px;color:#41ef76;margin-top:3px}
+
+.actions{display:flex;gap:9px}
+.action{
+ width:48px;height:48px;border-radius:50%;
+ background:#111820;border:2px solid #624f31;
+ color:#fff;font-size:23px;
 }
+
+.stage{
+ flex:1;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ padding:8px;
+}
+
 .board{
-  position:relative;
-  width:min(94vw,680px);
-  aspect-ratio:1;
-  margin:auto;
-  border-radius:32px;
-  padding:8px;
-  background:#202b39;
-  box-shadow:0 20px 50px #000b,inset 0 0 0 2px #ffffff12;
+ position:relative;
+ width:min(94vw,850px);
+ aspect-ratio:1;
+ border-radius:7%;
+ background:#141a20;
+ box-shadow:
+ 0 0 0 5px #392918,
+ 0 0 0 9px #9a702d,
+ 0 25px 70px #000;
+ overflow:hidden;
 }
-.track{
-  position:absolute;
-  inset:8%;
-  border-radius:50%;
-  background:
-    repeating-conic-gradient(
-      from -15deg,
-      #344354 0deg 7.5deg,
-      #273443 7.5deg 15deg
-    );
-  border:10px solid #111a25;
-  box-shadow:inset 0 0 30px #000;
-}
-.inner{
-  position:absolute;
-  inset:22%;
-  border-radius:50%;
-  background:#18222e;
-  border:5px solid #39495b;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.center{
-  width:34%;
-  aspect-ratio:1;
-  border-radius:50%;
-  background:radial-gradient(circle,#4b8cff,#174a9e 60%,#071c40);
-  border:7px solid #79aaff;
-  box-shadow:0 0 25px #2680ff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:clamp(34px,8vw,58px);
-  user-select:none;
-}
-.zone{
-  position:absolute;
-  width:31%;
-  height:31%;
-  border-radius:22px;
-  padding:10px;
-  box-shadow:0 10px 25px #0008,inset 0 0 0 3px #ffffff28;
-}
-.zone h3{
-  font-size:13px;
-  margin-bottom:7px;
-  text-shadow:0 2px 3px #000;
-}
-.red{background:#a91422;top:4%;left:34.5%}
-.green{background:#168448;top:20%;right:4%}
-.orange{background:#c75b13;bottom:20%;right:4%}
-.blue{background:#1458a8;bottom:4%;left:34.5%}
-.yellow{background:#b88b05;bottom:20%;left:4%}
-.purple{background:#66358f;top:20%;left:4%}
 
-.tokens{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:7px;
-  width:72px;
-  margin:auto;
+/* golden outer frame */
+.board:before{
+ content:"";
+ position:absolute;
+ inset:0;
+ border:7px solid #d49b32;
+ border-radius:7%;
+ pointer-events:none;
+ z-index:20;
+ box-shadow:inset 0 0 25px #000;
 }
+
+/* six home areas */
+.home{
+ position:absolute;
+ width:39%;
+ height:39%;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ overflow:hidden;
+ clip-path:polygon(0 0,100% 0,100% 58%,58% 100%,0 100%);
+}
+
+.home.red{
+ left:3%;top:3%;
+ background:linear-gradient(145deg,#ff202b,#a60009);
+ transform:rotate(0deg);
+}
+.home.green{
+ right:3%;top:3%;
+ background:linear-gradient(145deg,#16df68,#008d3d);
+ transform:rotate(90deg);
+}
+.home.orange{
+ right:3%;bottom:3%;
+ background:linear-gradient(145deg,#ff9b19,#e85a00);
+ transform:rotate(180deg);
+}
+.home.blue{
+ right:30.5%;bottom:3%;
+ background:linear-gradient(145deg,#168cff,#0057ca);
+ transform:rotate(180deg);
+}
+.home.yellow{
+ left:3%;bottom:3%;
+ background:linear-gradient(145deg,#ffe21b,#e5aa00);
+ transform:rotate(270deg);
+}
+.home.purple{
+ left:3%;top:30.5%;
+ background:linear-gradient(145deg,#9b25ff,#5a00b7);
+ transform:rotate(270deg);
+}
+
+/* home token area */
+.homebox{
+ width:55%;
+ height:55%;
+ background:#ffffff0d;
+ border-radius:22%;
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:12%;
+ padding:12%;
+ transform:rotate(0);
+ box-shadow:inset 0 0 18px #0004;
+}
+
+.home.green .homebox,
+.home.orange .homebox,
+.home.blue .homebox,
+.home.yellow .homebox,
+.home.purple .homebox{
+ transform:rotate(-90deg);
+}
+.home.orange .homebox{transform:rotate(180deg)}
+.home.blue .homebox{transform:rotate(180deg)}
+.home.yellow .homebox{transform:rotate(90deg)}
+.home.purple .homebox{transform:rotate(90deg)}
+
 .token{
-  width:29px;
-  height:29px;
-  border-radius:50%;
-  border:3px solid #fff8;
-  box-shadow:0 3px 6px #0009,inset 0 2px 3px #fff8;
+ width:100%;
+ aspect-ratio:1;
+ border-radius:50%;
+ border:4px solid #ffffffcc;
+ box-shadow:
+ 0 7px 10px #000b,
+ 0 0 8px #fff4,
+  inset 0 4px 5px #fff9;
+ position:relative;
 }
-.token.red{background:#9b1723}
-.token.green{background:#178047}
-.token.orange{background:#c35b18}
-.token.blue{background:#155aa8}
-.token.yellow{background:#b48b08}
-.token.purple{background:#68358c}
-
-.star{
-  position:absolute;
-  width:34px;
-  height:34px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:24px;
-  filter:drop-shadow(0 2px 3px #000);
-}
-.s1{top:37%;left:12%}
-.s2{top:16%;left:31%}
-.s3{top:12%;right:31%}
-.s4{top:37%;right:12%}
-.s5{bottom:37%;right:12%}
-.s6{bottom:16%;right:31%}
-.s7{bottom:12%;left:31%}
-.s8{bottom:37%;left:12%}
-.s9{top:29%;left:28%}
-.s10{top:29%;right:28%}
-.s11{bottom:29%;right:28%}
-.s12{bottom:29%;left:28%}
-
-.controls{
-  margin-top:13px;
-  display:flex;
-  justify-content:center;
-  gap:10px;
-}
-button{
-  border:0;
-  border-radius:14px;
-  padding:12px 20px;
-  font-size:15px;
-  font-weight:800;
-  cursor:pointer;
-  color:white;
-}
-.roll{
-  background:#159b58;
-  box-shadow:0 5px 15px #159b5866;
-}
-.roll:active{transform:scale(.96)}
-.message{
-  margin-top:9px;
-  font-size:14px;
-  color:#c9d3df;
-}
-.team{
-  margin-top:8px;
-  font-size:12px;
-  color:#8f9aaa;
+.token:after{
+ content:"";
+ position:absolute;
+ inset:18%;
+ border:2px solid #ffffffbb;
+ border-radius:50%;
 }
 
-@media(max-width:500px){
-  .board{width:94vw;border-radius:24px}
-  .zone{border-radius:15px;padding:6px}
-  .zone h3{font-size:10px}
-  .tokens{gap:4px;width:54px}
-  .token{width:22px;height:22px;border-width:2px}
-  .star{font-size:18px;width:26px;height:26px}
+.redt{background:#e90f1c}
+.greent{background:#0caf4c}
+.oranget{background:#f47b0b}
+.bluet{background:#0875e8}
+.yellowt{background:#f4c900}
+.purplet{background:#7d16df}
+
+/* playing tracks */
+.track{
+ position:absolute;
+ background:#f5f6f5;
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:1px;
+ box-shadow:inset 0 0 0 2px #111;
+}
+
+.track.v{
+ width:13%;
+ height:38%;
+ left:43.5%;
+ top:1%;
+}
+.track.v.bottom{
+ top:auto;
+ bottom:1%;
+}
+
+.track.h{
+ height:13%;
+ width:38%;
+ left:1%;
+ top:43.5%;
+}
+.track.h.right{
+ left:auto;
+ right:1%;
+}
+
+.cell{
+ background:#f7f8f6;
+ border:1px solid #8b8b8b;
+ min-width:0;
+}
+.cell.colored.red{background:#ee1722}
+.cell.colored.green{background:#10a94d}
+.cell.colored.orange{background:#f28712}
+.cell.colored.blue{background:#1681e9}
+.cell.colored.yellow{background:#f0c70b}
+.cell.colored.purple{background:#7818d6}
+
+.safe{
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ font-size:clamp(12px,2vw,22px);
+ color:#fff;
+}
+
+/* central dice area */
+.center{
+ position:absolute;
+ left:50%;top:50%;
+ transform:translate(-50%,-50%);
+ width:29%;
+ aspect-ratio:1;
+ border-radius:50%;
+ background:
+ radial-gradient(circle,#176eff 0,#07357c 53%,#03152d 70%);
+ border:8px solid #c58a28;
+ box-shadow:
+ 0 0 0 5px #111,
+ 0 0 25px #087bff,
+ 0 12px 25px #000;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ z-index:15;
+}
+
+.dice{
+ width:48%;
+ aspect-ratio:1;
+ border-radius:20%;
+ background:linear-gradient(145deg,#fff,#d5d9df);
+ color:#111;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:clamp(38px,7vw,65px);
+ box-shadow:0 8px 15px #0008,inset 0 2px 3px #fff;
+ cursor:pointer;
+ user-select:none;
+ transition:.15s;
+}
+.dice:active{transform:scale(.92)}
+
+.pointer{
+ position:absolute;
+ font-size:25px;
+ font-weight:900;
+ z-index:12;
+ text-shadow:0 2px 4px #000;
+}
+.p-red{left:26%;top:28%;color:#ff2430}
+.p-green{right:27%;top:28%;color:#20db6a}
+.p-orange{right:27%;bottom:28%;color:#ff9a1d}
+.p-blue{right:43%;bottom:15%;color:#238dff}
+.p-yellow{left:28%;bottom:28%;color:#ffe21a}
+.p-purple{left:27%;top:48%;color:#a84dff}
+
+/* moving tokens */
+.moving{
+ position:absolute;
+ width:42px;
+ height:42px;
+ border-radius:50%;
+ border:4px solid #fff;
+ z-index:18;
+ box-shadow:0 6px 10px #000;
+}
+.moving.red{background:#e91621;left:37%;top:30%}
+.moving.green{background:#0daf4e;right:30%;top:34%}
+.moving.orange{background:#f4770b;right:28%;top:47%}
+.moving.blue{background:#0878ed;left:53%;bottom:20%}
+.moving.yellow{background:#f2ca09;left:27%;bottom:30%}
+.moving.purple{background:#7b19db;left:31%;top:52%}
+
+.bottom{
+ height:58px;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ gap:15px;
+ color:#cbd3dc;
+ font-size:13px;
+}
+.turn{
+ padding:7px 15px;
+ border-radius:20px;
+ background:#14231c;
+ border:1px solid #29db76;
+ color:#5af295;
 }
 </style>
 </head>
 
 <body>
 
-<div class="game">
+<div class="app">
 
-  <div class="top">
-    <div class="logo">BHAICHARA</div>
-    <div class="status">● OFFLINE</div>
+<header class="top">
+ <div class="brand">
+  <div class="menu">☰</div>
+  <div class="crown">👑</div>
+  <div>
+   <div class="title">BHAICHARA</div>
+   <div class="online">● Online</div>
   </div>
+ </div>
 
-  <div class="board">
+ <div class="actions">
+  <button class="action">♫</button>
+  <button class="action">🔊</button>
+  <button class="action">⚙</button>
+ </div>
+</header>
 
-    <!-- 6 PLAYER HOME ZONES -->
+<main class="stage">
 
-    <div class="zone red">
-      <h3>PLAYER 4</h3>
-      <div class="tokens">
-        <span class="token red"></span>
-        <span class="token red"></span>
-        <span class="token red"></span>
-        <span class="token red"></span>
-      </div>
-    </div>
+<div class="board">
 
-    <div class="zone green">
-      <h3>PLAYER 5</h3>
-      <div class="tokens">
-        <span class="token green"></span>
-        <span class="token green"></span>
-        <span class="token green"></span>
-        <span class="token green"></span>
-      </div>
-    </div>
+ <!-- HOME ZONES -->
 
-    <div class="zone orange">
-      <h3>PLAYER 6</h3>
-      <div class="tokens">
-        <span class="token orange"></span>
-        <span class="token orange"></span>
-        <span class="token orange"></span>
-        <span class="token orange"></span>
-      </div>
-    </div>
-
-    <div class="zone blue">
-      <h3>PLAYER 1</h3>
-      <div class="tokens">
-        <span class="token blue"></span>
-        <span class="token blue"></span>
-        <span class="token blue"></span>
-        <span class="token blue"></span>
-      </div>
-    </div>
-
-    <div class="zone yellow">
-      <h3>PLAYER 2</h3>
-      <div class="tokens">
-        <span class="token yellow"></span>
-        <span class="token yellow"></span>
-        <span class="token yellow"></span>
-        <span class="token yellow"></span>
-      </div>
-    </div>
-
-    <div class="zone purple">
-      <h3>PLAYER 3</h3>
-      <div class="tokens">
-        <span class="token purple"></span>
-        <span class="token purple"></span>
-        <span class="token purple"></span>
-        <span class="token purple"></span>
-      </div>
-    </div>
-
-    <!-- 12 SAFE POSITIONS -->
-
-    <div class="star s1">⭐</div>
-    <div class="star s2">⭐</div>
-    <div class="star s3">⭐</div>
-    <div class="star s4">⭐</div>
-    <div class="star s5">⭐</div>
-    <div class="star s6">⭐</div>
-    <div class="star s7">⭐</div>
-    <div class="star s8">⭐</div>
-    <div class="star s9">⭐</div>
-    <div class="star s10">⭐</div>
-    <div class="star s11">⭐</div>
-    <div class="star s12">⭐</div>
-
-    <div class="track"></div>
-
-    <div class="inner">
-      <div class="center" id="dice">⚄</div>
-    </div>
-
+ <div class="home red">
+  <div class="homebox">
+   <i class="token redt"></i><i class="token redt"></i>
+   <i class="token redt"></i><i class="token redt"></i>
   </div>
+ </div>
 
-  <div class="controls">
-    <button class="roll" onclick="rollDice()">🎲 ROLL DICE</button>
+ <div class="home green">
+  <div class="homebox">
+   <i class="token greent"></i><i class="token greent"></i>
+   <i class="token greent"></i><i class="token greent"></i>
   </div>
+ </div>
 
-  <div class="message" id="message">
-    PLAYER 1 — आपकी Turn
+ <div class="home orange">
+  <div class="homebox">
+   <i class="token oranget"></i><i class="token oranget"></i>
+   <i class="token oranget"></i><i class="token oranget"></i>
   </div>
+ </div>
 
-  <div class="team">
-    Teams: P1 + P4 &nbsp; | &nbsp; P2 + P5 &nbsp; | &nbsp; P3 + P6
+ <div class="home blue">
+  <div class="homebox">
+   <i class="token bluet"></i><i class="token bluet"></i>
+   <i class="token bluet"></i><i class="token bluet"></i>
   </div>
+ </div>
+
+ <div class="home yellow">
+  <div class="homebox">
+   <i class="token yellowt"></i><i class="token yellowt"></i>
+   <i class="token yellowt"></i><i class="token yellowt"></i>
+  </div>
+ </div>
+
+ <div class="home purple">
+  <div class="homebox">
+   <i class="token purplet"></i><i class="token purplet"></i>
+   <i class="token purplet"></i><i class="token purplet"></i>
+  </div>
+ </div>
+
+ <!-- TRACKS -->
+
+ <div class="track v" id="topTrack"></div>
+ <div class="track v bottom" id="bottomTrack"></div>
+ <div class="track h" id="leftTrack"></div>
+ <div class="track h right" id="rightTrack"></div>
+
+ <!-- SAFE STARS -->
+ <div class="safe pointer p-red">★</div>
+ <div class="safe pointer p-green">★</div>
+ <div class="safe pointer p-orange">★</div>
+ <div class="safe pointer p-blue">★</div>
+ <div class="safe pointer p-yellow">★</div>
+ <div class="safe pointer p-purple">★</div>
+
+ <!-- EXTRA SAFE POSITIONS -->
+ <div class="safe pointer" style="left:31%;top:25%">★</div>
+ <div class="safe pointer" style="right:31%;top:25%">★</div>
+ <div class="safe pointer" style="right:31%;bottom:25%">★</div>
+ <div class="safe pointer" style="left:31%;bottom:25%">★</div>
+ <div class="safe pointer" style="left:46%;top:21%">★</div>
+ <div class="safe pointer" style="left:46%;bottom:21%">★</div>
+
+ <!-- TOKENS ON TRACK -->
+
+ <div class="moving red"></div>
+ <div class="moving green"></div>
+ <div class="moving orange"></div>
+ <div class="moving blue"></div>
+ <div class="moving yellow"></div>
+ <div class="moving purple"></div>
+
+ <!-- CENTER DICE -->
+
+ <div class="center">
+  <div class="dice" id="dice" onclick="rollDice()">⚄</div>
+ </div>
+
+</div>
+</main>
+
+<footer class="bottom">
+ <div class="turn" id="turn">PLAYER 1 — YOUR TURN</div>
+ <div>6 Players • 3 Teams • Undo OFF</div>
+</footer>
 
 </div>
 
 <script>
-const diceFaces = ["⚀","⚁","⚂","⚃","⚄","⚅"];
-
-let currentPlayer = 1;
+const faces=["⚀","⚁","⚂","⚃","⚄","⚅"];
+let player=1;
 
 function rollDice(){
+ const n=Math.floor(Math.random()*6);
+ document.getElementById("dice").textContent=faces[n];
 
-  const number = Math.floor(Math.random()*6);
-
-  document.getElementById("dice").textContent = diceFaces[number];
-
-  if(number === 5){
-    document.getElementById("message").textContent =
-      "PLAYER " + currentPlayer + " — 6 आया! Extra Turn 🔥";
-    return;
-  }
-
-  document.getElementById("message").textContent =
-    "PLAYER " + currentPlayer + " — " + (number+1) +
-    " आया | अब Goti Move करें";
-
-  currentPlayer++;
-
-  if(currentPlayer > 6){
-    currentPlayer = 1;
-  }
+ if(n===5){
+  document.getElementById("turn").textContent=
+   "PLAYER "+player+" — 6! EXTRA TURN 🔥";
+ }else{
+  document.getElementById("turn").textContent=
+   "PLAYER "+player+" — "+(n+1)+" आया";
+  setTimeout(()=>{
+   player++;
+   if(player>6)player=1;
+   document.getElementById("turn").textContent=
+    "PLAYER "+player+" — YOUR TURN";
+  },700);
+ }
 }
 </script>
 
