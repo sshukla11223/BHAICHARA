@@ -1,695 +1,932 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>BHAICHARA — 6 Player Partner Ludo</title>
+<title>BHAICHARA — 6 Player Ludo</title>
 
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  -webkit-tap-highlight-color:transparent;
+}
+
 html,body{
-  margin:0;width:100%;height:100%;overflow:hidden;
-  background:
-    radial-gradient(circle at 50% 45%,#173b4d 0,#07151f 48%,#02070b 100%);
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#050b10;
   font-family:Arial,sans-serif;
 }
-body{display:flex;align-items:center;justify-content:center}
-#game{
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+#app{
   position:relative;
   width:min(100vw,100vh);
   height:min(100vw,100vh);
 }
-svg{width:100%;height:100%;display:block}
+
+canvas{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
 .logo{
-  position:absolute;z-index:20;top:5px;left:18px;
-  color:white;font-weight:1000;font-size:clamp(18px,4vw,31px);
-  letter-spacing:3px;text-shadow:0 4px 9px #000;
+  position:absolute;
+  left:20px;
+  top:12px;
+  color:#fff;
+  font-size:clamp(20px,4vw,34px);
+  font-weight:900;
+  letter-spacing:3px;
+  text-shadow:0 4px 10px #000;
+  z-index:5;
 }
+
 .online{
-  position:absolute;right:16px;top:8px;z-index:20;
-  color:#58ffab;border:1px solid #48ff9d;border-radius:20px;
-  padding:6px 13px;background:#03110ddd;font-size:11px;font-weight:900;
+  position:absolute;
+  right:18px;
+  top:15px;
+  color:#53ff9e;
+  border:1px solid #53ff9e;
+  border-radius:25px;
+  padding:7px 15px;
+  background:#03100be8;
+  font-weight:800;
+  font-size:12px;
+  z-index:5;
 }
-.online i{
-  display:inline-block;width:7px;height:7px;border-radius:50%;
-  background:#4aff9e;box-shadow:0 0 9px #4aff9e;margin-right:5px;
+
+.online span{
+  display:inline-block;
+  width:7px;
+  height:7px;
+  background:#42ff98;
+  border-radius:50%;
+  margin-right:6px;
+  box-shadow:0 0 10px #42ff98;
 }
+
 .turn{
-  position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
-  z-index:30;color:#fff;background:#020a11e8;
-  border:1px solid #ffffff35;border-radius:22px;
-  padding:8px 17px;font-size:12px;font-weight:bold;white-space:nowrap;
-}
-.notice{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  z-index:50;background:#02080eeF;border:1px solid #ffffff44;
-  border-radius:15px;padding:12px 22px;color:white;font-weight:900;
-  opacity:0;pointer-events:none;transition:.2s;
-}
-.notice.show{opacity:1}
-.token{cursor:pointer}
-.selectable{animation:pulse .65s infinite alternate}
-@keyframes pulse{
-  from{filter:drop-shadow(0 0 2px white)}
-  to{filter:drop-shadow(0 0 15px white)}
+  position:absolute;
+  bottom:9px;
+  left:50%;
+  transform:translateX(-50%);
+  color:white;
+  background:#050b10e8;
+  border:1px solid #ffffff35;
+  border-radius:22px;
+  padding:8px 18px;
+  font-size:12px;
+  font-weight:bold;
+  white-space:nowrap;
+  z-index:5;
 }
 </style>
 </head>
 
 <body>
 
-<div id="game">
+<div id="app">
+
+<canvas id="board"></canvas>
 
 <div class="logo">BHAICHARA</div>
-<div class="online"><i></i>ONLINE</div>
 
-<svg viewBox="0 0 1000 1000">
+<div class="online">
+  <span></span>ONLINE
+</div>
 
-<defs>
-
-<!-- GOLD -->
-<linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-  <stop offset="0" stop-color="#70420b"/>
-  <stop offset=".28" stop-color="#d89b28"/>
-  <stop offset=".5" stop-color="#ffe88b"/>
-  <stop offset=".72" stop-color="#d18c19"/>
-  <stop offset="1" stop-color="#70420b"/>
-</linearGradient>
-
-<!-- TOKENS -->
-<radialGradient id="blue">
-  <stop offset="0" stop-color="#75d1ff"/>
-  <stop offset=".55" stop-color="#168bea"/>
-  <stop offset="1" stop-color="#034779"/>
-</radialGradient>
-
-<radialGradient id="yellow">
-  <stop offset="0" stop-color="#fff87b"/>
-  <stop offset=".55" stop-color="#efc500"/>
-  <stop offset="1" stop-color="#856000"/>
-</radialGradient>
-
-<radialGradient id="purple">
-  <stop offset="0" stop-color="#e9a3ff"/>
-  <stop offset=".55" stop-color="#9135c8"/>
-  <stop offset="1" stop-color="#48106a"/>
-</radialGradient>
-
-<radialGradient id="red">
-  <stop offset="0" stop-color="#ff8585"/>
-  <stop offset=".55" stop-color="#df3030"/>
-  <stop offset="1" stop-color="#720f0f"/>
-</radialGradient>
-
-<radialGradient id="green">
-  <stop offset="0" stop-color="#82ffb0"/>
-  <stop offset=".55" stop-color="#18aa59"/>
-  <stop offset="1" stop-color="#07592c"/>
-</radialGradient>
-
-<radialGradient id="orange">
-  <stop offset="0" stop-color="#ffc77f"/>
-  <stop offset=".55" stop-color="#ef7418"/>
-  <stop offset="1" stop-color="#853300"/>
-</radialGradient>
-
-<filter id="shadow">
-  <feDropShadow dx="0" dy="10" stdDeviation="9"
-  flood-color="#000" flood-opacity=".72"/>
-</filter>
-
-<filter id="tokenShadow">
-  <feDropShadow dx="0" dy="4" stdDeviation="3"
-  flood-color="#000" flood-opacity=".75"/>
-</filter>
-
-</defs>
-
-<!-- ================= BOARD ================= -->
-
-<circle cx="500" cy="500" r="468"
- fill="#030b12" stroke="url(#gold)" stroke-width="20"
- filter="url(#shadow)"/>
-
-<circle cx="500" cy="500" r="442"
- fill="#0a2636" stroke="#35566a" stroke-width="5"/>
-
-<circle cx="500" cy="500" r="414"
- fill="none" stroke="#06131c" stroke-width="32"/>
-
-<!-- HOMES -->
-<g id="homes"></g>
-
-<!-- WIDE TRACK BASE -->
-<circle cx="500" cy="500" r="337"
- fill="none" stroke="#06131d" stroke-width="104"/>
-
-<circle cx="500" cy="500" r="337"
- fill="none" stroke="#263f4d" stroke-width="4"/>
-
-<!-- TRACK CELLS -->
-<g id="track"></g>
-
-<!-- HOME LANES -->
-<g id="lanes"></g>
-
-<!-- STARS + ARROWS -->
-<g id="markers"></g>
-
-<!-- ================= CENTER ================= -->
-
-<polygon
- points="500,355 630,430 630,570 500,645 370,570 370,430"
- fill="#02080e"
- stroke="url(#gold)" stroke-width="12"
- filter="url(#shadow)"/>
-
-<polygon
- points="500,385 600,443 600,557 500,615 400,557 400,443"
- fill="#116fc7"
- stroke="#81d5ff" stroke-width="4"/>
-
-<polygon
- points="500,410 575,453 575,547 500,590 425,547 425,453"
- fill="#187ed8"
- stroke="#b5e6ff" stroke-width="2"/>
-
-<!-- 3D DICE -->
-<g id="dice" transform="translate(500 500)">
-
-  <polygon
-    points="0,-55 48,-27 48,27 0,55 -48,27 -48,-27"
-    fill="#f7faff"
-    stroke="#d9e7f0"
-    stroke-width="4"
-    filter="url(#tokenShadow)"/>
-
-  <polygon
-    points="0,-55 48,-27 0,0 -48,-27"
-    fill="#ffffff"/>
-
-  <polygon
-    points="0,0 48,-27 48,27 0,55"
-    fill="#dce7ef"/>
-
-  <polygon
-    points="-48,-27 0,0 0,55 -48,27"
-    fill="#c7d5df"/>
-
-  <g id="pips"></g>
-</g>
-
-<!-- TOKENS -->
-<g id="tokens"></g>
-
-</svg>
-
-<div id="notice" class="notice"></div>
-<div id="turn" class="turn">P1 की बारी • Dice दबाएँ</div>
+<div class="turn" id="turn">
+  P1 की बारी • Dice दबाएँ
+</div>
 
 </div>
 
 <script>
 
 /* =========================================================
-   BHAICHARA V3
+   BHAICHARA
+   PURE JAVASCRIPT CANVAS BOARD
    ========================================================= */
 
-const NS="http://www.w3.org/2000/svg";
+const canvas = document.getElementById("board");
+const ctx = canvas.getContext("2d");
+const turnText = document.getElementById("turn");
 
-const homes=document.getElementById("homes");
-const track=document.getElementById("track");
-const lanes=document.getElementById("lanes");
-const markers=document.getElementById("markers");
-const tokensLayer=document.getElementById("tokens");
-const pips=document.getElementById("pips");
-const dice=document.getElementById("dice");
-const turnBox=document.getElementById("turn");
-const notice=document.getElementById("notice");
+let W,H,S,CX,CY;
 
-const CX=500,CY=500;
-const CELLS=72;
-const PATH_R=337;
+/* ---------------------------------------------------------
+   PLAYERS
+--------------------------------------------------------- */
 
-const players=[
- {id:0,name:"P1",color:"#168bea",grad:"url(#blue)",team:0},
- {id:1,name:"P2",color:"#efc800",grad:"url(#yellow)",team:1},
- {id:2,name:"P3",color:"#8d32c5",grad:"url(#purple)",team:2},
- {id:3,name:"P4",color:"#dc3030",grad:"url(#red)",team:0},
- {id:4,name:"P5",color:"#18a95a",grad:"url(#green)",team:1},
- {id:5,name:"P6",color:"#ef7418",grad:"url(#orange)",team:2}
+const players = [
+  {
+    name:"P1",
+    color:"#087cf0",
+    light:"#38a5ff",
+    angle:60,
+    team:0
+  },
+  {
+    name:"P2",
+    color:"#f0c400",
+    light:"#ffe44c",
+    angle:120,
+    team:1
+  },
+  {
+    name:"P3",
+    color:"#8427c7",
+    light:"#b44eff",
+    angle:180,
+    team:2
+  },
+  {
+    name:"P4",
+    color:"#e52229",
+    light:"#ff5b60",
+    angle:240,
+    team:0
+  },
+  {
+    name:"P5",
+    color:"#0aad55",
+    light:"#35dc7d",
+    angle:300,
+    team:1
+  },
+  {
+    name:"P6",
+    color:"#ed7116",
+    light:"#ff9b43",
+    angle:0,
+    team:2
+  }
 ];
 
-const partner={0:3,3:0,1:4,4:1,2:5,5:2};
+const partner = {
+  0:3,
+  3:0,
+  1:4,
+  4:1,
+  2:5,
+  5:2
+};
 
-/*
- Reference layout:
- P4 top-left
- P5 top-right
- P6 right
- P1 bottom-right
- P2 bottom-left
- P3 left
-*/
-const homeAngles=[-30,210,150,330,30,90];
+/* ---------------------------------------------------------
+   RESIZE
+--------------------------------------------------------- */
 
-/* actual circular start points */
-const starts=[0,12,24,36,48,60];
+function resize(){
 
-/* --------------------------------------------------------- */
+  const dpr = Math.min(window.devicePixelRatio || 1,2);
 
-function el(tag,attrs={}){
-  const e=document.createElementNS(NS,tag);
-  Object.keys(attrs).forEach(k=>e.setAttribute(k,attrs[k]));
-  return e;
+  W = canvas.clientWidth;
+  H = canvas.clientHeight;
+  S = Math.min(W,H);
+
+  canvas.width = W*dpr;
+  canvas.height = H*dpr;
+
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+
+  CX=W/2;
+  CY=H/2;
+
+  draw();
 }
 
-function polar(r,a){
-  const rad=(a-90)*Math.PI/180;
-  return [
-    CX+r*Math.cos(rad),
-    CY+r*Math.sin(rad)
-  ];
+window.addEventListener("resize",resize);
+
+/* ---------------------------------------------------------
+   HELPERS
+--------------------------------------------------------- */
+
+function rad(deg){
+  return deg*Math.PI/180;
 }
 
-function point(index){
-  index=((index%CELLS)+CELLS)%CELLS;
-  return polar(PATH_R,index*360/CELLS);
+function point(cx,cy,r,angle){
+
+  const a=rad(angle-90);
+
+  return {
+    x:cx+r*Math.cos(a),
+    y:cy+r*Math.sin(a)
+  };
 }
 
-/* =========================================================
-   HOME ZONES
-   ========================================================= */
+function polygon(points,fill,stroke=null,width=1){
 
-players.forEach((p,i)=>{
+  ctx.beginPath();
 
-  const a=homeAngles[i];
-
-  const left=polar(430,a-26);
-  const right=polar(430,a+26);
-
-  const home=el("polygon",{
-    points:
-      `${CX},${CY} ${left[0]},${left[1]} ${right[0]},${right[1]}`,
-    fill:p.color,
-    opacity:.88,
-    stroke:"#06131d",
-    "stroke-width":7
+  points.forEach((p,i)=>{
+    if(i===0)ctx.moveTo(p.x,p.y);
+    else ctx.lineTo(p.x,p.y);
   });
 
-  homes.appendChild(home);
+  ctx.closePath();
 
-  /* raised inner panel */
+  if(fill){
+    ctx.fillStyle=fill;
+    ctx.fill();
+  }
 
-  const c=polar(382,a);
+  if(stroke){
+    ctx.strokeStyle=stroke;
+    ctx.lineWidth=width;
+    ctx.stroke();
+  }
+}
 
-  const panel=el("circle",{
-    cx:c[0],
-    cy:c[1],
-    r:73,
-    fill:"#03101a",
-    stroke:"#ffffff35",
-    "stroke-width":4,
-    filter:"url(#tokenShadow)"
-  });
+function roundedRect(x,y,w,h,r,fill,stroke=null,lw=1){
 
-  homes.appendChild(panel);
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
 
-  const label=el("text",{
-    x:c[0],
-    y:c[1]-94,
-    fill:"#fff",
-    "font-size":22,
-    "font-weight":900,
-    "text-anchor":"middle"
-  });
+  ctx.fillStyle=fill;
+  ctx.fill();
 
-  label.textContent=p.name;
-  homes.appendChild(label);
-});
+  if(stroke){
+    ctx.strokeStyle=stroke;
+    ctx.lineWidth=lw;
+    ctx.stroke();
+  }
+}
 
-/* =========================================================
-   TRACK
-   ========================================================= */
+/* ---------------------------------------------------------
+   BACKGROUND
+--------------------------------------------------------- */
 
-for(let i=0;i<CELLS;i++){
+function background(){
 
-  const [x,y]=point(i);
-  const owner=starts.indexOf(i);
+  const g=ctx.createRadialGradient(
+    CX,CY,S*.05,
+    CX,CY,S*.8
+  );
 
-  const cell=el("rect",{
-    x:x-18,
-    y:y-18,
-    width:36,
-    height:36,
-    rx:6,
-    fill:owner>=0 ? players[owner].color : "#eef4f7",
-    stroke:"#172a35",
-    "stroke-width":2
-  });
+  g.addColorStop(0,"#173b4c");
+  g.addColorStop(.45,"#091923");
+  g.addColorStop(1,"#02070b");
 
-  track.appendChild(cell);
+  ctx.fillStyle=g;
+  ctx.fillRect(0,0,W,H);
+
+  /* subtle golden light */
+
+  const glow=ctx.createRadialGradient(
+    CX,CY,S*.2,
+    CX,CY,S*.72
+  );
+
+  glow.addColorStop(0,"rgba(255,180,40,.08)");
+  glow.addColorStop(1,"rgba(0,0,0,0)");
+
+  ctx.fillStyle=glow;
+  ctx.fillRect(0,0,W,H);
+}
+
+/* ---------------------------------------------------------
+   OUTER BOARD
+--------------------------------------------------------- */
+
+function outerBoard(){
+
+  const R=S*.455;
+
+  ctx.save();
+
+  ctx.shadowColor="rgba(0,0,0,.8)";
+  ctx.shadowBlur=S*.025;
+  ctx.shadowOffsetY=S*.015;
+
+  ctx.beginPath();
+  ctx.arc(CX,CY,R,0,Math.PI*2);
+
+  const gold=ctx.createLinearGradient(
+    CX-R,CY-R,
+    CX+R,CY+R
+  );
+
+  gold.addColorStop(0,"#8a5712");
+  gold.addColorStop(.25,"#e3a52d");
+  gold.addColorStop(.5,"#ffe58a");
+  gold.addColorStop(.7,"#d48f1e");
+  gold.addColorStop(1,"#70420d");
+
+  ctx.fillStyle="#06131d";
+  ctx.fill();
+
+  ctx.strokeStyle=gold;
+  ctx.lineWidth=S*.018;
+  ctx.stroke();
+
+  ctx.restore();
+
+  ctx.beginPath();
+  ctx.arc(CX,CY,R*.94,0,Math.PI*2);
+
+  ctx.strokeStyle="#35596d";
+  ctx.lineWidth=S*.006;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(CX,CY,R*.88,0,Math.PI*2);
+
+  ctx.strokeStyle="#06131d";
+  ctx.lineWidth=S*.035;
+  ctx.stroke();
+}
+
+/* ---------------------------------------------------------
+   SIX HOME SECTORS
+--------------------------------------------------------- */
+
+function homeSector(player){
+
+  const R1=S*.145;
+  const R2=S*.405;
+
+  const a=player.angle;
+
+  const p1=point(CX,CY,R1,a-28);
+  const p2=point(CX,CY,R2,a-28);
+  const p3=point(CX,CY,R2,a+28);
+  const p4=point(CX,CY,R1,a+28);
+
+  const grad=ctx.createLinearGradient(
+    p2.x,p2.y,
+    p3.x,p3.y
+  );
+
+  grad.addColorStop(0,player.light);
+  grad.addColorStop(.5,player.color);
+  grad.addColorStop(1,"#111");
+
+  polygon(
+    [p1,p2,p3,p4],
+    grad,
+    "#06131c",
+    S*.005
+  );
 
   /* inner highlight */
 
-  if(owner<0){
+  const q1=point(CX,CY,R1+S*.01,a-23);
+  const q2=point(CX,CY,R2-S*.025,a-23);
+  const q3=point(CX,CY,R2-S*.025,a+23);
+  const q4=point(CX,CY,R1+S*.01,a+23);
 
-    const hi=el("rect",{
-      x:x-14,
-      y:y-14,
-      width:28,
-      height:8,
-      rx:3,
-      fill:"#fff",
-      opacity:.35,
-      "pointer-events":"none"
-    });
-
-    track.appendChild(hi);
-  }
+  polygon(
+    [q1,q2,q3,q4],
+    player.color,
+    null
+  );
 }
 
-/* =========================================================
-   HOME LANES
-   ========================================================= */
+function allHomes(){
 
-players.forEach((p,i)=>{
-
-  const angle=homeAngles[i];
-
-  for(let n=0;n<6;n++){
-
-    const pos=polar(282-n*29,angle);
-
-    const cell=el("rect",{
-      x:pos[0]-17,
-      y:pos[1]-17,
-      width:34,
-      height:34,
-      rx:6,
-      fill:p.color,
-      opacity:.95,
-      stroke:"#101d25",
-      "stroke-width":2
-    });
-
-    lanes.appendChild(cell);
-  }
-});
-
-/* =========================================================
-   SAFE STARS — EXACTLY 12
-   ========================================================= */
-
-const safe=[];
-
-for(let i=0;i<6;i++){
-  safe.push(starts[i]);
-  safe.push((starts[i]+6)%CELLS);
+  players.forEach(homeSector);
 }
 
-safe.forEach((index,i)=>{
+/* ---------------------------------------------------------
+   PLAYER HOME TOKEN AREA
+--------------------------------------------------------- */
 
-  const [x,y]=point(index);
+function homeBase(player){
 
-  const star=el("text",{
-    x:x,
-    y:y+8,
-    fill:"#ffd84b",
-    "font-size":26,
-    "font-weight":900,
-    "text-anchor":"middle",
-    "pointer-events":"none"
-  });
-
-  star.textContent="★";
-  markers.appendChild(star);
-});
-
-/* =========================================================
-   DIRECTION ARROWS
-   ========================================================= */
-
-for(let i=0;i<6;i++){
-
-  const index=(starts[i]+10)%CELLS;
-  const [x,y]=point(index);
-
-  const arrow=el("text",{
-    x:x,
-    y:y+7,
-    fill:players[i].color,
-    "font-size":22,
-    "font-weight":900,
-    "text-anchor":"middle",
-    "pointer-events":"none"
-  });
-
-  arrow.textContent="➜";
-  arrow.setAttribute(
-    "transform",
-    `rotate(${index*5} ${x} ${y})`
+  const pos=point(
+    CX,
+    CY,
+    S*.382,
+    player.angle
   );
 
-  markers.appendChild(arrow);
-}
+  ctx.save();
 
-/* =========================================================
-   HOME TOKEN POSITIONS
-   ========================================================= */
+  ctx.shadowColor="#000";
+  ctx.shadowBlur=S*.025;
 
-const homePositions={};
+  ctx.beginPath();
+  ctx.arc(
+    pos.x,
+    pos.y,
+    S*.052,
+    0,
+    Math.PI*2
+  );
 
-players.forEach((p,i)=>{
+  ctx.fillStyle="#061019";
+  ctx.fill();
 
-  const c=polar(382,homeAngles[i]);
+  ctx.strokeStyle="#ffffff30";
+  ctx.lineWidth=S*.003;
+  ctx.stroke();
 
-  homePositions[p.id]=[
-    [c[0]-29,c[1]-29],
-    [c[0]+29,c[1]-29],
-    [c[0]-29,c[1]+29],
-    [c[0]+29,c[1]+29]
+  ctx.restore();
+
+  const gap=S*.026;
+
+  const places=[
+    [-gap,-gap],
+    [gap,-gap],
+    [-gap,gap],
+    [gap,gap]
   ];
-});
 
-/* =========================================================
-   TOKENS
-   ========================================================= */
+  places.forEach(([dx,dy])=>{
+    token(
+      pos.x+dx,
+      pos.y+dy,
+      player,
+      S*.022
+    );
+  });
 
-const tokens=[];
+  ctx.fillStyle="#fff";
+  ctx.font=`900 ${S*.021}px Arial`;
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
 
-for(let p=0;p<6;p++){
-  for(let n=0;n<4;n++){
+  const label=point(
+    CX,
+    CY,
+    S*.435,
+    player.angle
+  );
 
-    tokens.push({
-      id:p+"-"+n,
-      player:p,
-      number:n,
-      progress:-1,
-      finished:false,
-      node:null
+  ctx.fillText(
+    player.name,
+    label.x,
+    label.y
+  );
+}
+
+/* ---------------------------------------------------------
+   TOKEN
+--------------------------------------------------------- */
+
+function token(x,y,player,r){
+
+  ctx.save();
+
+  ctx.shadowColor="rgba(0,0,0,.7)";
+  ctx.shadowBlur=r*.8;
+  ctx.shadowOffsetY=r*.4;
+
+  const g=ctx.createRadialGradient(
+    x-r*.45,
+    y-r*.55,
+    r*.1,
+    x,
+    y,
+    r*1.2
+  );
+
+  g.addColorStop(0,"#fff");
+  g.addColorStop(.08,player.light);
+  g.addColorStop(.45,player.color);
+  g.addColorStop(1,"#111");
+
+  ctx.beginPath();
+  ctx.arc(x,y,r,0,Math.PI*2);
+
+  ctx.fillStyle=g;
+  ctx.fill();
+
+  ctx.restore();
+
+  /* outer ring */
+
+  ctx.beginPath();
+  ctx.arc(x,y,r*.68,0,Math.PI*2);
+
+  ctx.strokeStyle="#fff";
+  ctx.lineWidth=Math.max(1,r*.11);
+  ctx.stroke();
+
+  /* highlight */
+
+  ctx.beginPath();
+  ctx.ellipse(
+    x-r*.28,
+    y-r*.38,
+    r*.25,
+    r*.12,
+    -.35,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fillStyle="rgba(255,255,255,.65)";
+  ctx.fill();
+}
+
+/* ---------------------------------------------------------
+   TRACK
+--------------------------------------------------------- */
+
+const TRACK_COUNT=72;
+
+function trackPoint(i){
+
+  const angle=-90+i*(360/TRACK_COUNT);
+
+  return point(
+    CX,
+    CY,
+    S*.323,
+    angle
+  );
+}
+
+function track(){
+
+  const cell=S*.034;
+
+  for(let i=0;i<TRACK_COUNT;i++){
+
+    const p=trackPoint(i);
+
+    let owner=-1;
+
+    players.forEach((pl,index)=>{
+
+      const start=index*12;
+
+      if(i===start)
+        owner=index;
+
     });
+
+    roundedRect(
+      p.x-cell/2,
+      p.y-cell/2,
+      cell,
+      cell,
+      cell*.15,
+      owner>=0
+        ? players[owner].color
+        : "#edf3f5",
+      "#263741",
+      S*.0015
+    );
+
+    if(owner<0){
+
+      roundedRect(
+        p.x-cell*.36,
+        p.y-cell*.36,
+        cell*.72,
+        cell*.18,
+        2,
+        "rgba(255,255,255,.35)"
+      );
+    }
   }
 }
 
-function globalPos(t){
+/* ---------------------------------------------------------
+   12 SAFE STARS
+--------------------------------------------------------- */
 
-  if(t.progress<0 || t.progress>=72)return null;
+function star(x,y,r,color="#ffd943"){
 
-  return (starts[t.player]+t.progress)%CELLS;
-}
+  ctx.save();
 
-function tokenPos(t){
+  ctx.translate(x,y);
 
-  if(t.progress===-1){
-    return homePositions[t.player][t.number];
+  ctx.beginPath();
+
+  for(let i=0;i<10;i++){
+
+    const rr=i%2===0?r:r*.42;
+    const a=-Math.PI/2+i*Math.PI/5;
+
+    const px=Math.cos(a)*rr;
+    const py=Math.sin(a)*rr;
+
+    if(i===0)ctx.moveTo(px,py);
+    else ctx.lineTo(px,py);
   }
 
-  if(t.progress>=72){
+  ctx.closePath();
 
-    const angle=homeAngles[t.player];
-    const lane=t.progress-72;
+  ctx.fillStyle=color;
+  ctx.shadowColor=color;
+  ctx.shadowBlur=r*.4;
+  ctx.fill();
 
-    return polar(282-lane*29,angle);
-  }
-
-  return point(globalPos(t));
+  ctx.restore();
 }
 
-/* =========================================================
-   DRAW TOKENS
-   ========================================================= */
+function safeStars(){
 
-function drawTokens(){
+  const safeIndexes=[];
 
-  tokensLayer.innerHTML="";
+  for(let i=0;i<6;i++){
 
-  tokens.forEach(t=>{
+    safeIndexes.push(i*12);
+    safeIndexes.push(i*12+6);
+  }
 
-    const p=players[t.player];
-    const [x,y]=tokenPos(t);
+  safeIndexes.forEach(i=>{
 
-    const g=el("g",{
-      class:"token",
-      transform:`translate(${x},${y})`
-    });
+    const p=trackPoint(i);
 
-    if(selectable(t))g.classList.add("selectable");
-
-    /* shadow */
-
-    g.appendChild(el("ellipse",{
-      cx:3,cy:7,rx:16,ry:9,
-      fill:"#000",opacity:.5
-    }));
-
-    /* lower body */
-
-    g.appendChild(el("circle",{
-      cx:0,cy:2,r:15,
-      fill:"#07131b",
-      opacity:.9
-    }));
-
-    /* main ring token */
-
-    g.appendChild(el("circle",{
-      cx:0,cy:0,r:15,
-      fill:p.grad,
-      stroke:"#06121a",
-      "stroke-width":2
-    }));
-
-    /* ring */
-
-    g.appendChild(el("circle",{
-      cx:0,cy:0,r:10,
-      fill:"none",
-      stroke:"#fff",
-      "stroke-width":2,
-      opacity:.8
-    }));
-
-    /* center */
-
-    g.appendChild(el("circle",{
-      cx:0,cy:0,r:5,
-      fill:p.color,
-      opacity:.9
-    }));
-
-    /* shine */
-
-    g.appendChild(el("ellipse",{
-      cx:-5,cy:-7,rx:4,ry:2.5,
-      fill:"#fff",
-      opacity:.65,
-      transform:"rotate(-25 -5 -7)"
-    }));
-
-    g.addEventListener("click",()=>{
-      if(selectable(t))moveToken(t);
-    });
-
-    tokensLayer.appendChild(g);
-    t.node=g;
+    star(
+      p.x,
+      p.y,
+      S*.012
+    );
   });
 }
 
-/* =========================================================
-   GAME STATE
-   ========================================================= */
+/* ---------------------------------------------------------
+   ARROWS
+--------------------------------------------------------- */
 
-let currentPlayer=0;
-let diceValue=0;
-let rolling=false;
+function arrow(x,y,angle,color){
 
-function ownFinished(player){
+  ctx.save();
 
-  return tokens.filter(t=>
-    t.player===player && t.finished
-  ).length===4;
+  ctx.translate(x,y);
+  ctx.rotate(rad(angle));
+
+  ctx.fillStyle=color;
+
+  ctx.beginPath();
+  ctx.moveTo(S*.012,0);
+  ctx.lineTo(-S*.007,-S*.007);
+  ctx.lineTo(-S*.003,0);
+  ctx.lineTo(-S*.007,S*.007);
+  ctx.closePath();
+
+  ctx.fill();
+
+  ctx.restore();
 }
 
-function teamFinished(team){
+function arrows(){
 
-  return tokens.filter(t=>
-    players[t.player].team===team && t.finished
-  ).length===8;
+  players.forEach((p,i)=>{
+
+    const index=i*12+9;
+    const pos=trackPoint(index);
+
+    arrow(
+      pos.x,
+      pos.y,
+      index*5,
+      p.color
+    );
+  });
 }
 
-function controllable(player){
+/* ---------------------------------------------------------
+   COLORED HOME LANES
+--------------------------------------------------------- */
 
-  const list=[player];
+function homeLane(player){
 
-  /* own 4 home होने के बाद partner unlock */
-  if(ownFinished(player)){
-    list.push(partner[player]);
+  for(let n=1;n<=6;n++){
+
+    const r=S*(.265-n*.024);
+
+    const pos=point(
+      CX,
+      CY,
+      r,
+      player.angle
+    );
+
+    const size=S*.031;
+
+    roundedRect(
+      pos.x-size/2,
+      pos.y-size/2,
+      size,
+      size,
+      size*.13,
+      player.color,
+      "#172630",
+      S*.0015
+    );
+  }
+}
+
+function lanes(){
+
+  players.forEach(homeLane);
+}
+
+/* ---------------------------------------------------------
+   CENTER
+--------------------------------------------------------- */
+
+function center(){
+
+  const r=S*.105;
+
+  ctx.save();
+
+  ctx.shadowColor="#000";
+  ctx.shadowBlur=S*.025;
+
+  ctx.beginPath();
+
+  for(let i=0;i<6;i++){
+
+    const p=point(
+      CX,
+      CY,
+      r,
+      i*60
+    );
+
+    if(i===0)ctx.moveTo(p.x,p.y);
+    else ctx.lineTo(p.x,p.y);
   }
 
-  return list;
+  ctx.closePath();
+
+  const g=ctx.createLinearGradient(
+    CX-r,CY-r,
+    CX+r,CY+r
+  );
+
+  g.addColorStop(0,"#0d2d43");
+  g.addColorStop(.45,"#0d7ce0");
+  g.addColorStop(1,"#064078");
+
+  ctx.fillStyle=g;
+  ctx.fill();
+
+  ctx.strokeStyle="#f0b738";
+  ctx.lineWidth=S*.008;
+  ctx.stroke();
+
+  ctx.restore();
+
+  /* blue inner ring */
+
+  ctx.beginPath();
+  ctx.arc(CX,CY,r*.68,0,Math.PI*2);
+
+  const blue=ctx.createRadialGradient(
+    CX,CY,r*.1,
+    CX,CY,r*.68
+  );
+
+  blue.addColorStop(0,"#54c4ff");
+  blue.addColorStop(.5,"#087de0");
+  blue.addColorStop(1,"#032c59");
+
+  ctx.fillStyle=blue;
+  ctx.fill();
+
+  ctx.strokeStyle="#74d5ff";
+  ctx.lineWidth=S*.004;
+  ctx.stroke();
+
+  drawDice();
 }
 
-function canMove(t,roll){
+/* ---------------------------------------------------------
+   3D DICE
+--------------------------------------------------------- */
 
-  if(t.finished)return false;
+let diceNumber=1;
 
-  if(t.progress===-1){
-    return roll===6;
-  }
+function drawDice(){
 
-  return t.progress+roll<=78;
-}
+  const r=S*.043;
 
-function selectable(t){
+  ctx.save();
 
-  if(rolling || diceValue===0)return false;
+  ctx.shadowColor="rgba(0,0,0,.7)";
+  ctx.shadowBlur=S*.015;
+  ctx.shadowOffsetY=S*.008;
 
-  if(!controllable(currentPlayer).includes(t.player))
-    return false;
+  /* cube body */
 
-  return canMove(t,diceValue);
-}
+  roundedRect(
+    CX-r,
+    CY-r,
+    r*2,
+    r*2,
+    r*.2,
+    "#f5f8fa",
+    "#d4e0e6",
+    S*.002
+  );
 
-/* =========================================================
-   DICE
-   ========================================================= */
-
-function showDice(n){
-
-  pips.innerHTML="";
+  ctx.restore();
 
   const patterns={
     1:[[0,0]],
-    2:[[-18,-18],[18,18]],
-    3:[[-18,-18],[0,0],[18,18]],
-    4:[[-18,-18],[18,-18],[-18,18],[18,18]],
-    5:[[-18,-18],[18,-18],[0,0],[-18,18],[18,18]],
-    6:[[-18,-20],[18,-20],[-18,0],[18,0],[-18,20],[18,20]]
+    2:[[-.3,-.3],[.3,.3]],
+    3:[[-.3,-.3],[0,0],[.3,.3]],
+    4:[[-.3,-.3],[.3,-.3],[-.3,.3],[.3,.3]],
+    5:[[-.3,-.3],[.3,-.3],[0,0],[-.3,.3],[.3,.3]],
+    6:[[-.3,-.32],[.3,-.32],[-.3,0],[.3,0],[-.3,.32],[.3,.32]]
   };
 
-  patterns[n].forEach(([x,y])=>{
+  patterns[diceNumber].forEach(([px,py])=>{
 
-    pips.appendChild(el("circle",{
-      cx:x,cy:y,r:6,
-      fill:"#c91414",
-      stroke:"#8d0909",
-      "stroke-width":1
-    }));
+    ctx.beginPath();
+
+    ctx.arc(
+      CX+px*r*1.45,
+      CY+py*r*1.45,
+      r*.11,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fillStyle="#d10d16";
+    ctx.fill();
   });
 }
 
-showDice(1);
+/* ---------------------------------------------------------
+   ALL HOME BASES
+--------------------------------------------------------- */
 
-/* =========================================================
+function bases(){
+
+  players.forEach(homeBase);
+}
+
+/* ---------------------------------------------------------
+   DRAW
+--------------------------------------------------------- */
+
+function draw(){
+
+  if(!W)return;
+
+  ctx.clearRect(0,0,W,H);
+
+  background();
+
+  outerBoard();
+
+  allHomes();
+
+  track();
+
+  lanes();
+
+  safeStars();
+
+  arrows();
+
+  bases();
+
+  center();
+}
+
+/* ---------------------------------------------------------
+   DICE CLICK
+--------------------------------------------------------- */
+
+canvas.addEventListener("click",e=>{
+
+  const rect=canvas.getBoundingClientRect();
+
+  const x=e.clientX-rect.left;
+  const y=e.clientY-rect.top;
+
+  const dx=x-CX;
+  const dy=y-CY;
+
+  const distance=Math.sqrt(dx*dx+dy*dy);
+
+  if(distance<S*.13){
+
+    rollDice();
+  }
+});
+
+/* ---------------------------------------------------------
    DICE ROLL
-   ========================================================= */
+--------------------------------------------------------- */
 
-dice.addEventListener("click",rollDice);
+let rolling=false;
 
 function rollDice(){
 
-  if(rolling || diceValue!==0)return;
+  if(rolling)return;
 
   rolling=true;
 
@@ -697,224 +934,36 @@ function rollDice(){
 
   const timer=setInterval(()=>{
 
-    showDice(1+Math.floor(Math.random()*6));
+    diceNumber=
+      Math.floor(Math.random()*6)+1;
+
+    draw();
 
     count++;
 
-    if(count>=10){
+    if(count>=12){
 
       clearInterval(timer);
 
-      diceValue=1+Math.floor(Math.random()*6);
+      diceNumber=
+        Math.floor(Math.random()*6)+1;
 
-      showDice(diceValue);
+      draw();
 
       rolling=false;
 
-      afterRoll();
+      turnText.textContent=
+        `P1 की बारी • ${diceNumber} आया • Token चुनें`;
     }
 
-  },75);
+  },70);
 }
 
-/* =========================================================
-   AFTER ROLL
-   ========================================================= */
-
-function afterRoll(){
-
-  drawTokens();
-
-  const possible=tokens.some(t=>selectable(t));
-
-  if(!possible){
-
-    message(
-      diceValue===6
-      ?"6 आया • कोई चाल नहीं"
-      :"कोई चाल नहीं"
-    );
-
-    setTimeout(()=>{
-
-      if(diceValue===6){
-
-        diceValue=0;
-        updateTurn();
-
-      }else{
-
-        nextTurn();
-      }
-
-    },800);
-
-    return;
-  }
-
-  updateTurn(
-    diceValue===6
-    ?"6 आया • Token चुनें"
-    :"Token चुनें"
-  );
-}
-
-/* =========================================================
-   MOVE
-   ========================================================= */
-
-function moveToken(t){
-
-  const roll=diceValue;
-
-  if(!canMove(t,roll))return;
-
-  if(t.progress===-1){
-    t.progress=0;
-  }else{
-    t.progress+=roll;
-  }
-
-  if(t.progress===78){
-    t.finished=true;
-  }
-
-  capture(t);
-
-  drawTokens();
-
-  diceValue=0;
-
-  if(teamFinished(players[currentPlayer].team)){
-
-    message("🏆 TEAM "+(players[currentPlayer].team+1)+" WINS");
-
-    updateTurn("🏆 Team जीत गई");
-
-    return;
-  }
-
-  if(roll===6){
-
-    message("6! फिर से चाल");
-
-    setTimeout(()=>{
-      hideMessage();
-      updateTurn();
-    },650);
-
-  }else{
-
-    nextTurn();
-  }
-}
-
-/* =========================================================
-   CAPTURE
-   ========================================================= */
-
-function capture(moved){
-
-  const pos=globalPos(moved);
-
-  if(pos===null)return;
-
-  if(safe.includes(pos))return;
-
-  tokens.forEach(other=>{
-
-    if(other===moved)return;
-    if(other.finished)return;
-    if(other.progress<0 || other.progress>=72)return;
-
-    /* same team cannot capture */
-    if(
-      players[other.player].team===
-      players[moved.player].team
-    )return;
-
-    if(globalPos(other)===pos){
-
-      other.progress=-1;
-      other.finished=false;
-
-      message("⚡ Token कट गया!");
-    }
-  });
-}
-
-/* =========================================================
-   TURN
-   ========================================================= */
-
-function nextTurn(){
-
-  diceValue=0;
-
-  currentPlayer=(currentPlayer+1)%6;
-
-  drawTokens();
-  updateTurn();
-}
-
-function updateTurn(custom){
-
-  const p=players[currentPlayer];
-
-  let text=custom || p.name+" की बारी • Dice दबाएँ";
-
-  if(ownFinished(currentPlayer)){
-
-    text+=" • Partner "+
-      players[partner[currentPlayer]].name+
-      " unlocked";
-  }
-
-  turnBox.textContent=text;
-}
-
-/* =========================================================
-   MESSAGE
-   ========================================================= */
-
-let noticeTimer;
-
-function message(text){
-
-  notice.textContent=text;
-  notice.classList.add("show");
-
-  clearTimeout(noticeTimer);
-
-  noticeTimer=setTimeout(hideMessage,900);
-}
-
-function hideMessage(){
-  notice.classList.remove("show");
-}
-
-/* =========================================================
+/* ---------------------------------------------------------
    START
-   ========================================================= */
+--------------------------------------------------------- */
 
-drawTokens();
-updateTurn();
-
-/* RESET */
-window.BHAICHARA_RESET=function(){
-
-  tokens.forEach(t=>{
-    t.progress=-1;
-    t.finished=false;
-  });
-
-  currentPlayer=0;
-  diceValue=0;
-
-  showDice(1);
-  drawTokens();
-  updateTurn();
-};
+resize();
 
 </script>
 
