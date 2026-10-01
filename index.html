@@ -1,137 +1,148 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>BHAICHARA — 6 Player Ludo</title>
+<title>BHAICHARA</title>
 
 <style>
-*{box-sizing:border-box}
-html,body{
-  margin:0;width:100%;height:100%;
-  overflow:hidden;
-  font-family:Arial,Helvetica,sans-serif;
-  background:
-    radial-gradient(circle at 50% 45%,#163b57 0,#07121d 48%,#02070c 100%);
-  color:white;
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at center,#123348 0%,#06131e 55%,#02070c 100%);
+  font-family:Arial,sans-serif;
+}
+
 body{
   display:flex;
   justify-content:center;
   align-items:center;
 }
+
 .game{
-  width:min(96vw,96vh,1050px);
-  aspect-ratio:1/1.08;
+  width:min(96vw,96vh,900px);
+  height:min(96vw,96vh,900px);
   position:relative;
 }
-.top{
-  height:8%;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 2%;
-}
-.logo{
-  font-weight:1000;
+
+.title{
+  position:absolute;
+  top:5px;
+  left:18px;
+  z-index:20;
+  color:white;
+  font-size:clamp(18px,4vw,30px);
+  font-weight:900;
   letter-spacing:4px;
-  font-size:clamp(18px,3vw,34px);
   text-shadow:0 3px 8px #000;
 }
+
 .online{
-  border:1px solid #36e58a;
-  color:#5cffad;
-  border-radius:30px;
-  padding:7px 14px;
-  font-size:12px;
-  font-weight:800;
-  box-shadow:0 0 15px #1aff7933;
-}
-.online i{
-  display:inline-block;
-  width:8px;height:8px;
-  background:#43ff9a;
-  border-radius:50%;
-  margin-right:6px;
-  box-shadow:0 0 8px #43ff9a;
-}
-.boardWrap{
   position:absolute;
-  left:1%;
-  right:1%;
-  top:9%;
-  bottom:3%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  right:18px;
+  top:8px;
+  z-index:20;
+  padding:7px 13px;
+  border:1px solid #43ff9a;
+  border-radius:20px;
+  color:#59ffad;
+  font-size:11px;
+  font-weight:bold;
+  background:#03120dcc;
 }
+
+.online span{
+  display:inline-block;
+  width:7px;
+  height:7px;
+  margin-right:5px;
+  border-radius:50%;
+  background:#45ff9b;
+  box-shadow:0 0 10px #45ff9b;
+}
+
 svg{
+  position:absolute;
   width:100%;
   height:100%;
-  overflow:visible;
-  filter:drop-shadow(0 18px 25px #000b);
+  left:0;
+  top:0;
 }
+
 .cell{
-  stroke:#07131d;
+  stroke:#172936;
   stroke-width:2;
 }
+
 .token{
   cursor:pointer;
-  transition:.18s;
 }
-.token:hover{
-  filter:brightness(1.25) drop-shadow(0 0 8px white);
+
+.selectable{
+  animation:pulse .65s infinite alternate;
 }
-.token.selectable{
-  animation:pulse .8s infinite alternate;
-}
+
 @keyframes pulse{
-  from{filter:drop-shadow(0 0 3px white)}
-  to{filter:drop-shadow(0 0 14px white)}
+  from{
+    filter:drop-shadow(0 0 2px white);
+  }
+  to{
+    filter:drop-shadow(0 0 13px white);
+  }
 }
-.turnText{
-  position:absolute;
-  bottom:1%;
-  left:50%;
-  transform:translateX(-50%);
-  background:#07131dcc;
-  border:1px solid #ffffff25;
-  padding:8px 18px;
-  border-radius:20px;
-  font-size:12px;
-  white-space:nowrap;
-}
+
 #dice{
   cursor:pointer;
 }
+
 #dice.disabled{
-  opacity:.65;
-  cursor:default;
+  opacity:.5;
 }
-.diceFace{
-  fill:#1979d8;
-  stroke:#8bd4ff;
-  stroke-width:4;
-  filter:drop-shadow(0 6px 8px #0009);
-}
-.pip{fill:white}
-.message{
+
+.turn{
   position:absolute;
-  top:50%;
+  bottom:8px;
   left:50%;
-  transform:translate(-50%,-50%);
-  pointer-events:none;
-  background:#020912dd;
+  transform:translateX(-50%);
+  background:#020911dd;
   border:1px solid #ffffff33;
-  padding:12px 22px;
-  border-radius:16px;
-  font-size:14px;
-  font-weight:800;
-  opacity:0;
-  transition:.25s;
-  z-index:5;
+  border-radius:30px;
+  padding:8px 16px;
+  color:#fff;
+  font-size:12px;
+  font-weight:bold;
+  white-space:nowrap;
+  z-index:30;
 }
-.message.show{opacity:1}
+
+.notice{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  padding:12px 22px;
+  background:#020912ed;
+  border:1px solid #ffffff44;
+  border-radius:15px;
+  color:white;
+  font-weight:bold;
+  z-index:50;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+}
+
+.notice.show{
+  opacity:1;
+}
 </style>
 </head>
 
@@ -139,690 +150,1096 @@ svg{
 
 <div class="game">
 
-  <div class="top">
-    <div class="logo">BHAICHARA</div>
-    <div class="online"><i></i>ONLINE</div>
-  </div>
+<div class="title">BHAICHARA</div>
 
-  <div class="boardWrap">
-    <svg id="board" viewBox="0 0 1000 1000">
-
-      <defs>
-        <filter id="shadow">
-          <feDropShadow dx="0" dy="5" stdDeviation="5"
-                        flood-color="#000" flood-opacity=".55"/>
-        </filter>
-
-        <linearGradient id="gold" x1="0" x2="1">
-          <stop offset="0" stop-color="#8b5b19"/>
-          <stop offset=".5" stop-color="#ffd66b"/>
-          <stop offset="1" stop-color="#7c4b12"/>
-        </linearGradient>
-
-        <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
-          <stop stop-color="#48aaff"/>
-          <stop offset=".5" stop-color="#0872ca"/>
-          <stop offset="1" stop-color="#03447e"/>
-        </linearGradient>
-
-        <radialGradient id="blueTok">
-          <stop stop-color="#52baff"/>
-          <stop offset=".65" stop-color="#147bd2"/>
-          <stop offset="1" stop-color="#03497f"/>
-        </radialGradient>
-
-        <radialGradient id="yellowTok">
-          <stop stop-color="#fff46a"/>
-          <stop offset=".65" stop-color="#e9b900"/>
-          <stop offset="1" stop-color="#916800"/>
-        </radialGradient>
-
-        <radialGradient id="purpleTok">
-          <stop stop-color="#d889ff"/>
-          <stop offset=".65" stop-color="#8429bb"/>
-          <stop offset="1" stop-color="#48106c"/>
-        </radialGradient>
-
-        <radialGradient id="redTok">
-          <stop stop-color="#ff7373"/>
-          <stop offset=".65" stop-color="#d62828"/>
-          <stop offset="1" stop-color="#781010"/>
-        </radialGradient>
-
-        <radialGradient id="greenTok">
-          <stop stop-color="#68ff9b"/>
-          <stop offset=".65" stop-color="#18a95a"/>
-          <stop offset="1" stop-color="#075c2d"/>
-        </radialGradient>
-
-        <radialGradient id="orangeTok">
-          <stop stop-color="#ffb36a"/>
-          <stop offset=".65" stop-color="#ef7117"/>
-          <stop offset="1" stop-color="#8d3600"/>
-        </radialGradient>
-      </defs>
-
-      <!-- OUTER FRAME -->
-      <circle cx="500" cy="500" r="455"
-              fill="#071521"
-              stroke="url(#gold)"
-              stroke-width="18"
-              filter="url(#shadow)"/>
-
-      <circle cx="500" cy="500" r="425"
-              fill="#0b2030"
-              stroke="#29465a"
-              stroke-width="4"/>
-
-      <!-- HOME WEDGES -->
-      <g id="homes"></g>
-
-      <!-- CIRCULAR TRACK -->
-      <g id="track"></g>
-
-      <!-- SAFE STARS -->
-      <g id="stars"></g>
-
-      <!-- CENTRAL HEXAGON -->
-      <polygon points="500,385 600,442 600,558 500,615 400,558 400,442"
-               fill="#071522"
-               stroke="url(#gold)"
-               stroke-width="9"
-               filter="url(#shadow)"/>
-
-      <polygon points="500,405 580,452 580,548 500,595 420,548 420,452"
-               fill="url(#blue)"
-               stroke="#63c6ff"
-               stroke-width="3"/>
-
-      <!-- DICE -->
-      <g id="dice" transform="translate(500 500)">
-        <polygon class="diceFace"
-          points="0,-58 50,-29 50,29 0,58 -50,29 -50,-29"/>
-        <g id="pips"></g>
-      </g>
-
-      <!-- TOKENS -->
-      <g id="tokens"></g>
-
-    </svg>
-
-    <div id="msg" class="message"></div>
-    <div id="turn" class="turnText">P1 की बारी • Dice दबाएँ</div>
-  </div>
+<div class="online">
+<span></span>ONLINE
 </div>
 
+<svg viewBox="0 0 1000 1000">
+
+<defs>
+
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#81530e"/>
+<stop offset=".45" stop-color="#ffe17b"/>
+<stop offset="1" stop-color="#9b6415"/>
+</linearGradient>
+
+<radialGradient id="blueToken">
+<stop offset="0" stop-color="#5bc3ff"/>
+<stop offset=".65" stop-color="#168be5"/>
+<stop offset="1" stop-color="#03497e"/>
+</radialGradient>
+
+<radialGradient id="yellowToken">
+<stop offset="0" stop-color="#fff46a"/>
+<stop offset=".65" stop-color="#edc400"/>
+<stop offset="1" stop-color="#8b6800"/>
+</radialGradient>
+
+<radialGradient id="purpleToken">
+<stop offset="0" stop-color="#e19aff"/>
+<stop offset=".65" stop-color="#9234c7"/>
+<stop offset="1" stop-color="#4b126d"/>
+</radialGradient>
+
+<radialGradient id="redToken">
+<stop offset="0" stop-color="#ff7777"/>
+<stop offset=".65" stop-color="#dd3030"/>
+<stop offset="1" stop-color="#741313"/>
+</radialGradient>
+
+<radialGradient id="greenToken">
+<stop offset="0" stop-color="#71ffa1"/>
+<stop offset=".65" stop-color="#19aa59"/>
+<stop offset="1" stop-color="#075b2d"/>
+</radialGradient>
+
+<radialGradient id="orangeToken">
+<stop offset="0" stop-color="#ffc078"/>
+<stop offset=".65" stop-color="#ef751b"/>
+<stop offset="1" stop-color="#873600"/>
+</radialGradient>
+
+<filter id="shadow">
+<feDropShadow dx="0" dy="8" stdDeviation="8"
+flood-color="#000" flood-opacity=".65"/>
+</filter>
+
+</defs>
+
+<!-- OUTER BOARD -->
+
+<circle
+cx="500"
+cy="500"
+r="465"
+fill="#06121c"
+stroke="url(#gold)"
+stroke-width="20"
+filter="url(#shadow)"
+/>
+
+<circle
+cx="500"
+cy="500"
+r="435"
+fill="#092332"
+stroke="#294a60"
+stroke-width="5"
+/>
+
+<!-- HOME ZONES -->
+<g id="homes"></g>
+
+<!-- TRACK -->
+<g id="track"></g>
+
+<!-- SAFE STARS -->
+<g id="safe"></g>
+
+<!-- CENTER -->
+<polygon
+points="500,365 617,432 617,568 500,635 383,568 383,432"
+fill="#06121c"
+stroke="url(#gold)"
+stroke-width="10"
+filter="url(#shadow)"
+/>
+
+<polygon
+points="500,390 590,442 590,558 500,610 410,558 410,442"
+fill="#1578d1"
+stroke="#7ed1ff"
+stroke-width="4"
+/>
+
+<!-- DICE -->
+<g id="dice" transform="translate(500 500)">
+
+<polygon
+points="0,-55 48,-28 48,28 0,55 -48,28 -48,-28"
+fill="#1479d4"
+stroke="#a4dcff"
+stroke-width="4"
+/>
+
+<g id="pips"></g>
+
+</g>
+
+<!-- TOKENS -->
+<g id="tokens"></g>
+
+</svg>
+
+<div id="notice" class="notice"></div>
+
+<div id="turn" class="turn">
+P1 की बारी • Dice दबाएँ
+</div>
+
+</div>
+
+
 <script>
-/* =========================================================
-   BHAICHARA — 6 PLAYER PARTNER LUDO
-   P1+P4 | P2+P5 | P3+P6
-   ========================================================= */
+
+/* =====================================
+   BHAICHARA
+   6 PLAYERS / 3 PARTNER TEAMS
+   ===================================== */
 
 const NS="http://www.w3.org/2000/svg";
-const board=document.getElementById("board");
-const track=document.getElementById("track");
+
 const homes=document.getElementById("homes");
-const stars=document.getElementById("stars");
+const track=document.getElementById("track");
+const safeLayer=document.getElementById("safe");
 const tokensLayer=document.getElementById("tokens");
 const pips=document.getElementById("pips");
 const dice=document.getElementById("dice");
-const turnText=document.getElementById("turn");
-const msg=document.getElementById("msg");
+
+const turnBox=document.getElementById("turn");
+const notice=document.getElementById("notice");
+
+
+/* PLAYERS */
 
 const players=[
-  {id:0,name:"P1",color:"#168bea",grad:"url(#blueTok)",team:0},
-  {id:1,name:"P2",color:"#f1c900",grad:"url(#yellowTok)",team:1},
-  {id:2,name:"P3",color:"#8a32c5",grad:"url(#purpleTok)",team:2},
-  {id:3,name:"P4",color:"#dc3030",grad:"url(#redTok)",team:0},
-  {id:4,name:"P5",color:"#19aa59",grad:"url(#greenTok)",team:1},
-  {id:5,name:"P6",color:"#ef7419",grad:"url(#orangeTok)",team:2}
+{
+ id:0,
+ name:"P1",
+ color:"#168bea",
+ gradient:"url(#blueToken)",
+ team:0
+},
+{
+ id:1,
+ name:"P2",
+ color:"#f1c900",
+ gradient:"url(#yellowToken)",
+ team:1
+},
+{
+ id:2,
+ name:"P3",
+ color:"#8a32c5",
+ gradient:"url(#purpleToken)",
+ team:2
+},
+{
+ id:3,
+ name:"P4",
+ color:"#dd3030",
+ gradient:"url(#redToken)",
+ team:0
+},
+{
+ id:4,
+ name:"P5",
+ color:"#19aa59",
+ gradient:"url(#greenToken)",
+ team:1
+},
+{
+ id:5,
+ name:"P6",
+ color:"#ef751b",
+ gradient:"url(#orangeToken)",
+ team:2
+}
 ];
 
-const partners={
-  0:3,3:0,
-  1:4,4:1,
-  2:5,5:2
+
+/* PARTNERS */
+
+const partner={
+ 0:3,
+ 3:0,
+ 1:4,
+ 4:1,
+ 2:5,
+ 5:2
 };
 
-const N=72;
-const cx=500,cy=500;
-const pathR=300;
-const homeR=365;
 
-/* प्रत्येक player की starting position */
-const starts=[0,12,24,36,48,60];
+/* BOARD */
 
-/* 12 SAFE STARS — exactly 2 per player */
-const safe=[];
-for(let i=0;i<6;i++){
-  safe.push(starts[i]);
-  safe.push((starts[i]+6)%N);
-}
+const CX=500;
+const CY=500;
 
-/* ---------------- SVG helpers ---------------- */
+const PATH_RADIUS=330;
 
-function el(tag,attrs={}){
-  const e=document.createElementNS(NS,tag);
-  for(const k in attrs)e.setAttribute(k,attrs[k]);
-  return e;
-}
+const TOTAL_CELLS=72;
 
-function polar(r,a){
-  const rad=(a-90)*Math.PI/180;
-  return [cx+r*Math.cos(rad),cy+r*Math.sin(rad)];
-}
 
-function pointForPath(index){
-  index=((index%N)+N)%N;
-  const a=index*360/N;
-  return polar(pathR,a);
-}
+/* START POSITIONS */
 
-/* ---------------- HOME AREAS ---------------- */
-
-const homeAngles=[
-  -90,       // P1 blue
-  -30,       // P2 yellow
-   30,       // P3 purple
-   90,       // P4 red
-  150,       // P5 green
-  210        // P6 orange
+const starts=[
+ 0,
+ 12,
+ 24,
+ 36,
+ 48,
+ 60
 ];
 
-players.forEach((p,i)=>{
-  const a=homeAngles[i];
-  const p1=polar(homeR-15,a-25);
-  const p2=polar(homeR-15,a+25);
 
-  const poly=el("polygon",{
-    points:`${cx},${cy} ${p1[0]},${p1[1]} ${p2[0]},${p2[1]}`,
-    fill:p.color,
-    opacity:.88,
-    stroke:"#07131d",
-    "stroke-width":5
-  });
-  homes.appendChild(poly);
+/* 12 SAFE STARS */
 
-  /* inner home circle */
-  const c=polar(330,a);
-  const inner=el("circle",{
-    cx:c[0],cy:c[1],r:72,
-    fill:"#071522",
-    stroke:"#ffffff30",
-    "stroke-width":3
-  });
-  homes.appendChild(inner);
+const safe=[];
 
-  /* player label */
-  const t=el("text",{
-    x:c[0],y:c[1]-87,
-    "text-anchor":"middle",
-    fill:"#fff",
-    "font-size":"22",
-    "font-weight":"900"
-  });
-  t.textContent=p.name;
-  homes.appendChild(t);
-});
+for(let i=0;i<6;i++){
 
-/* ---------------- TRACK ---------------- */
+ safe.push(starts[i]);
 
-for(let i=0;i<N;i++){
-  const [x,y]=pointForPath(i);
-  const rect=el("rect",{
-    x:x-15,y:y-15,
-    width:30,height:30,
-    rx:6,
-    class:"cell",
-    fill:"#d8e3e8",
-    opacity:.96
-  });
+ safe.push((starts[i]+6)%TOTAL_CELLS);
 
-  /* start cells */
-  const playerAtStart=starts.indexOf(i);
-  if(playerAtStart>=0){
-    rect.setAttribute("fill",players[playerAtStart].color);
-  }
-
-  track.appendChild(rect);
 }
 
-/* ---------------- SAFE STARS ---------------- */
 
-safe.forEach(index=>{
-  const [x,y]=pointForPath(index);
+/* HOME ANGLES */
 
-  const star=el("text",{
-    x:x,
-    y:y+8,
-    "text-anchor":"middle",
-    "font-size":"24",
-    fill:"#ffd84c",
-    "font-weight":"900",
-    "pointer-events":"none"
-  });
-  star.textContent="★";
-  stars.appendChild(star);
+const homeAngles=[
+ -90,
+ -30,
+ 30,
+ 90,
+ 150,
+ 210
+];
+
+
+/* =====================================
+   SVG HELPERS
+   ===================================== */
+
+function create(tag,attrs={}){
+
+ const node=document.createElementNS(NS,tag);
+
+ for(const key in attrs){
+   node.setAttribute(key,attrs[key]);
+ }
+
+ return node;
+}
+
+
+function polar(radius,angle){
+
+ const rad=(angle-90)*Math.PI/180;
+
+ return [
+   CX+radius*Math.cos(rad),
+   CY+radius*Math.sin(rad)
+ ];
+
+}
+
+
+function pathPoint(index){
+
+ index=((index%TOTAL_CELLS)+TOTAL_CELLS)%TOTAL_CELLS;
+
+ const angle=index*360/TOTAL_CELLS;
+
+ return polar(PATH_RADIUS,angle);
+
+}
+
+
+/* =====================================
+   HOME AREAS
+   ===================================== */
+
+players.forEach((player,i)=>{
+
+ const angle=homeAngles[i];
+
+ const left=polar(430,angle-24);
+ const right=polar(430,angle+24);
+
+ const polygon=create("polygon",{
+   points:
+   `${CX},${CY} ${left[0]},${left[1]} ${right[0]},${right[1]}`,
+   fill:player.color,
+   opacity:"0.9",
+   stroke:"#07131d",
+   "stroke-width":"6"
+ });
+
+ homes.appendChild(polygon);
+
+
+ /* HOME CIRCLE */
+
+ const center=polar(365,angle);
+
+ const circle=create("circle",{
+   cx:center[0],
+   cy:center[1],
+   r:72,
+   fill:"#06131d",
+   stroke:"#ffffff40",
+   "stroke-width":"3"
+ });
+
+ homes.appendChild(circle);
+
+
+ /* PLAYER NAME */
+
+ const text=create("text",{
+   x:center[0],
+   y:center[1]-90,
+   fill:"#fff",
+   "font-size":"21",
+   "font-weight":"900",
+   "text-anchor":"middle"
+ });
+
+ text.textContent=player.name;
+
+ homes.appendChild(text);
+
 });
 
-/* ---------------- HOME TOKEN POSITIONS ---------------- */
+
+/* =====================================
+   CIRCULAR TRACK
+   ===================================== */
+
+for(let i=0;i<TOTAL_CELLS;i++){
+
+ const [x,y]=pathPoint(i);
+
+ let color="#dce6eb";
+
+ const startPlayer=starts.indexOf(i);
+
+ if(startPlayer!==-1){
+   color=players[startPlayer].color;
+ }
+
+ const cell=create("rect",{
+   x:x-18,
+   y:y-18,
+   width:36,
+   height:36,
+   rx:7,
+   fill:color,
+   class:"cell"
+ });
+
+ track.appendChild(cell);
+
+}
+
+
+/* =====================================
+   SAFE STARS
+   ===================================== */
+
+safe.forEach(index=>{
+
+ const [x,y]=pathPoint(index);
+
+ const star=create("text",{
+   x:x,
+   y:y+8,
+   fill:"#ffd84d",
+   "font-size":"26",
+   "font-weight":"900",
+   "text-anchor":"middle",
+   "pointer-events":"none"
+ });
+
+ star.textContent="★";
+
+ safeLayer.appendChild(star);
+
+});
+
+
+/* =====================================
+   HOME TOKEN LOCATIONS
+   ===================================== */
 
 const homePositions={};
 
-players.forEach((p,i)=>{
-  const a=homeAngles[i];
+players.forEach((player,i)=>{
 
-  homePositions[p.id]=[];
+ const center=polar(365,homeAngles[i]);
 
-  for(let k=0;k<4;k++){
-    const offsets=[
-      [-28,-28],
-      [ 28,-28],
-      [-28, 28],
-      [ 28, 28]
-    ][k];
+ homePositions[player.id]=[
+   [center[0]-27,center[1]-27],
+   [center[0]+27,center[1]-27],
+   [center[0]-27,center[1]+27],
+   [center[0]+27,center[1]+27]
+ ];
 
-    const center=polar(330,a);
-    homePositions[p.id].push([
-      center[0]+offsets[0],
-      center[1]+offsets[1]
-    ]);
-  }
 });
 
-/* ---------------- TOKEN DATA ---------------- */
+
+/* =====================================
+   TOKEN DATA
+   ===================================== */
 
 const tokens=[];
 
 for(let p=0;p<6;p++){
-  for(let n=0;n<4;n++){
-    tokens.push({
-      id:`${p}-${n}`,
-      player:p,
-      number:n,
-      state:"base",
-      progress:-1,
-      finished:false,
-      node:null
-    });
-  }
+
+ for(let n=0;n<4;n++){
+
+   tokens.push({
+
+     id:p+"-"+n,
+
+     player:p,
+
+     number:n,
+
+     progress:-1,
+
+     finished:false,
+
+     node:null
+
+   });
+
+ }
+
 }
+
 
 /*
- progress:
- -1 = base
- 0..71 = circular path
- 72..77 = home lane
- 78 = finished
+ -1  = BASE
+ 0-71 = CIRCULAR TRACK
+ 72-77 = HOME LANE
+ 78 = FINISHED
 */
 
-function globalIndex(token){
-  if(token.progress<0)return null;
-  if(token.progress>=72)return null;
 
-  return (starts[token.player]+token.progress)%N;
+function globalPosition(token){
+
+ if(token.progress<0)return null;
+
+ if(token.progress>=72)return null;
+
+ return (starts[token.player]+token.progress)%TOTAL_CELLS;
+
 }
+
+
+/* =====================================
+   TOKEN POSITION
+   ===================================== */
 
 function tokenPosition(token){
 
-  if(token.state==="base"){
-    return homePositions[token.player][token.number];
-  }
+ if(token.progress===-1){
 
-  if(token.progress>=72){
-    const p=players[token.player];
-    const a=homeAngles[token.player];
+   return homePositions[token.player][token.number];
 
-    const lane=token.progress-72;
-    const r=285-lane*25;
-    return polar(r,a);
-  }
+ }
 
-  return pointForPath(globalIndex(token));
+
+ if(token.progress>=72){
+
+   const angle=homeAngles[token.player];
+
+   const lane=token.progress-72;
+
+   const radius=285-(lane*28);
+
+   return polar(radius,angle);
+
+ }
+
+
+ return pathPoint(globalPosition(token));
+
 }
 
-/* ---------------- TOKEN DRAW ---------------- */
+
+/* =====================================
+   DRAW TOKENS
+   ===================================== */
 
 function drawTokens(){
-  tokensLayer.innerHTML="";
 
-  tokens.forEach(token=>{
-    const [x,y]=tokenPosition(token);
-    const p=players[token.player];
+ tokensLayer.innerHTML="";
 
-    const g=el("g",{
-      class:"token",
-      transform:`translate(${x},${y})`
-    });
+ tokens.forEach(token=>{
 
-    if(isSelectable(token)){
-      g.classList.add("selectable");
-    }
+   const player=players[token.player];
 
-    const shadow=el("circle",{
-      cx:3,cy:5,r:13,
-      fill:"#000",
-      opacity:.45
-    });
+   const pos=tokenPosition(token);
 
-    const outer=el("circle",{
-      cx:0,cy:0,r:13,
-      fill:p.grad,
-      stroke:"#07131d",
-      "stroke-width":2
-    });
+   const group=create("g",{
+     class:"token",
+     transform:`translate(${pos[0]},${pos[1]})`
+   });
 
-    const ring=el("circle",{
-      cx:0,cy:0,r:9,
-      fill:"none",
-      stroke="#ffffff",
-      "stroke-width":1.5",
-      opacity:.55
-    });
 
-    const shine=el("circle",{
-      cx:-4,cy:-5,r:3,
-      fill:"#fff",
-      opacity:.6
-    });
+   if(selectable(token)){
+     group.classList.add("selectable");
+   }
 
-    g.appendChild(shadow);
-    g.appendChild(outer);
-    g.appendChild(ring);
-    g.appendChild(shine);
 
-    g.addEventListener("click",()=>{
-      if(isSelectable(token)) moveToken(token);
-    });
+   /* SHADOW */
 
-    tokensLayer.appendChild(g);
-    token.node=g;
-  });
+   const shadow=create("circle",{
+     cx:"3",
+     cy:"5",
+     r:"14",
+     fill:"#000",
+     opacity:"0.45"
+   });
+
+
+   /* OUTER RING */
+
+   const outer=create("circle",{
+     cx:"0",
+     cy:"0",
+     r:"14",
+     fill:player.gradient,
+     stroke:"#06131d",
+     "stroke-width":"2"
+   });
+
+
+   /* INNER RING */
+
+   const ring=create("circle",{
+     cx:"0",
+     cy:"0",
+     r:"10",
+     fill:"none",
+     stroke:"#ffffff",
+     "stroke-width":"1.5",
+     opacity:"0.5"
+   });
+
+
+   /* SHINE */
+
+   const shine=create("circle",{
+     cx:"-4",
+     cy:"-5",
+     r:"3",
+     fill:"#fff",
+     opacity:"0.65"
+   });
+
+
+   group.appendChild(shadow);
+   group.appendChild(outer);
+   group.appendChild(ring);
+   group.appendChild(shine);
+
+
+   group.addEventListener("click",()=>{
+
+     if(selectable(token)){
+       moveToken(token);
+     }
+
+   });
+
+
+   tokensLayer.appendChild(group);
+
+   token.node=group;
+
+ });
+
 }
 
-/* ---------------- TURN ---------------- */
+
+/* =====================================
+   TURN
+   ===================================== */
 
 let currentPlayer=0;
+
 let diceValue=0;
+
 let rolling=false;
 
-function ownTokensDone(player){
-  return tokens.filter(t=>
-    t.player===player && t.finished
-  ).length===4;
+
+function ownFinished(player){
+
+ return tokens.filter(t=>
+   t.player===player &&
+   t.finished
+ ).length===4;
+
 }
 
-function teamDone(team){
-  return tokens.filter(t=>
-    players[t.player].team===team && t.finished
-  ).length===8;
+
+function teamFinished(team){
+
+ return tokens.filter(t=>
+   players[t.player].team===team &&
+   t.finished
+ ).length===8;
+
 }
+
 
 function controllablePlayers(player){
-  const arr=[player];
 
-  /* Custom rule:
-     own 4 tokens home होने के बाद partner tokens */
-  if(ownTokensDone(player)){
-    arr.push(partners[player]);
-  }
+ const list=[player];
 
-  return arr;
+ if(ownFinished(player)){
+   list.push(partner[player]);
+ }
+
+ return list;
+
 }
 
-function isSelectable(token){
 
-  if(rolling || diceValue===0)return false;
-
-  if(!controllablePlayers(currentPlayer).includes(token.player))
-    return false;
-
-  if(token.finished)return false;
-
-  return canMove(token,diceValue);
-}
-
-/* ---------------- MOVE VALIDATION ---------------- */
+/* =====================================
+   MOVE CHECK
+   ===================================== */
 
 function canMove(token,roll){
 
-  if(token.progress===78)return false;
+ if(token.finished)return false;
 
-  if(token.progress===-1){
-    return roll===6;
-  }
+ if(token.progress===-1){
+   return roll===6;
+ }
 
-  return token.progress+roll<=78;
+ return token.progress+roll<=78;
+
 }
 
-/* ---------------- DICE ---------------- */
 
-function setDice(n){
+function selectable(token){
 
-  pips.innerHTML="";
+ if(rolling)return false;
 
-  const patterns={
-    1:[[0,0]],
-    2:[[-20,-20],[20,20]],
-    3:[[-20,-20],[0,0],[20,20]],
-    4:[[-20,-20],[20,-20],[-20,20],[20,20]],
-    5:[[-20,-20],[20,-20],[0,0],[-20,20],[20,20]],
-    6:[[-20,-24],[20,-24],[-20,0],[20,0],[-20,24],[20,24]]
-  };
+ if(diceValue===0)return false;
 
-  patterns[n].forEach(([x,y])=>{
-    const c=el("circle",{
-      cx:x,cy:y,r:6,
-      class:"pip"
-    });
-    pips.appendChild(c);
-  });
+ if(!controllablePlayers(currentPlayer).includes(token.player)){
+   return false;
+ }
+
+ return canMove(token,diceValue);
+
 }
 
-setDice(1);
+
+/* =====================================
+   DICE
+   ===================================== */
+
+function showDice(number){
+
+ pips.innerHTML="";
+
+ const pattern={
+
+ 1:[[0,0]],
+
+ 2:[
+   [-20,-20],
+   [20,20]
+ ],
+
+ 3:[
+   [-20,-20],
+   [0,0],
+   [20,20]
+ ],
+
+ 4:[
+   [-20,-20],
+   [20,-20],
+   [-20,20],
+   [20,20]
+ ],
+
+ 5:[
+   [-20,-20],
+   [20,-20],
+   [0,0],
+   [-20,20],
+   [20,20]
+ ],
+
+ 6:[
+   [-20,-22],
+   [20,-22],
+   [-20,0],
+   [20,0],
+   [-20,22],
+   [20,22]
+ ]
+
+ };
+
+
+ pattern[number].forEach(point=>{
+
+   const pip=create("circle",{
+     cx:point[0],
+     cy:point[1],
+     r:"6",
+     fill:"#fff"
+   });
+
+   pips.appendChild(pip);
+
+ });
+
+}
+
+
+showDice(1);
+
+
+/* =====================================
+   ROLL
+   ===================================== */
 
 dice.addEventListener("click",rollDice);
 
+
 function rollDice(){
 
-  if(rolling || diceValue!==0)return;
+ if(rolling)return;
 
-  rolling=true;
+ if(diceValue!==0)return;
 
-  let count=0;
+ rolling=true;
 
-  const timer=setInterval(()=>{
-    setDice(1+Math.floor(Math.random()*6));
-    count++;
+ let count=0;
 
-    if(count>=9){
-      clearInterval(timer);
+ const animation=setInterval(()=>{
 
-      diceValue=1+Math.floor(Math.random()*6);
-      setDice(diceValue);
+   const random=1+Math.floor(Math.random()*6);
 
-      rolling=false;
-      afterRoll();
-    }
-  },75);
+   showDice(random);
+
+   count++;
+
+   if(count>=10){
+
+     clearInterval(animation);
+
+     diceValue=1+Math.floor(Math.random()*6);
+
+     showDice(diceValue);
+
+     rolling=false;
+
+     afterRoll();
+
+   }
+
+ },70);
+
 }
 
-/* ---------------- AFTER ROLL ---------------- */
+
+/* =====================================
+   AFTER ROLL
+   ===================================== */
 
 function afterRoll(){
 
-  const possible=tokens.some(t=>isSelectable(t));
+ const possible=tokens.some(t=>selectable(t));
 
-  if(!possible){
+ drawTokens();
 
-    showMessage(
-      diceValue===6
-      ?"6 आया लेकिन कोई चाल नहीं है"
-      :"कोई चाल उपलब्ध नहीं"
-    );
 
-    setTimeout(()=>{
-      if(diceValue!==6){
-        nextTurn();
-      }else{
-        diceValue=0;
-        updateTurn();
-      }
-    },850);
+ if(!possible){
 
-    return;
-  }
+   showMessage(
+     diceValue===6
+     ?"6 आया — कोई चाल नहीं"
+     :"कोई चाल उपलब्ध नहीं"
+   );
 
-  updateTurn(
-    diceValue===6
-    ?"6 आया — Token चुनें"
-    :"Token चुनें"
-  );
+
+   setTimeout(()=>{
+
+     if(diceValue!==6){
+
+       nextTurn();
+
+     }else{
+
+       diceValue=0;
+       updateTurn();
+
+     }
+
+   },800);
+
+   return;
+
+ }
+
+
+ updateTurn(
+   diceValue===6
+   ?"6 आया • Token चुनें"
+   :"Token चुनें"
+ );
+
 }
 
-/* ---------------- MOVE ---------------- */
+
+/* =====================================
+   MOVE TOKEN
+   ===================================== */
 
 function moveToken(token){
 
-  const roll=diceValue;
+ const roll=diceValue;
 
-  if(!canMove(token,roll))return;
+ if(!canMove(token,roll))return;
 
-  /* Base -> starting cell */
-  if(token.progress===-1){
-    token.progress=0;
-    token.state="active";
-  }else{
-    token.progress+=roll;
-  }
 
-  /* Exact finish */
-  if(token.progress===78){
-    token.finished=true;
-    token.state="finished";
-  }
+ /* BASE TO START */
 
-  capture(token);
+ if(token.progress===-1){
 
-  drawTokens();
+   token.progress=0;
 
-  diceValue=0;
+ }else{
 
-  if(teamDone(players[currentPlayer].team)){
-    showMessage(
-      `🏆 TEAM ${players[currentPlayer].team+1} जीत गई!`
-    );
-    return;
-  }
+   token.progress+=roll;
 
-  if(roll===6){
-    showMessage("6! फिर से चाल");
-    setTimeout(()=>{
-      hideMessage();
-      updateTurn();
-    },650);
-  }else{
-    nextTurn();
-  }
+ }
+
+
+ /* FINISH */
+
+ if(token.progress===78){
+
+   token.finished=true;
+
+ }
+
+
+ /* CAPTURE */
+
+ capture(token);
+
+
+ drawTokens();
+
+
+ diceValue=0;
+
+
+ /* TEAM WIN */
+
+ if(teamFinished(players[currentPlayer].team)){
+
+   showMessage(
+     "🏆 TEAM "+(players[currentPlayer].team+1)+" WINS!"
+   );
+
+   updateTurn("🏆 Team जीत गई");
+
+   return;
+
+ }
+
+
+ /* SIX = EXTRA TURN */
+
+ if(roll===6){
+
+   showMessage("6! फिर से चाल");
+
+   setTimeout(()=>{
+
+     hideMessage();
+
+     updateTurn();
+
+   },650);
+
+ }else{
+
+   nextTurn();
+
+ }
+
 }
 
-/* ---------------- CAPTURE ---------------- */
+
+/* =====================================
+   CAPTURE
+   ===================================== */
 
 function capture(moved){
 
-  const pos=globalIndex(moved);
+ const position=globalPosition(moved);
 
-  if(pos===null)return;
+ if(position===null)return;
 
-  if(safe.includes(pos))return;
+ if(safe.includes(position))return;
 
-  tokens.forEach(other=>{
 
-    if(other===moved)return;
-    if(other.finished)return;
-    if(other.progress<0 || other.progress>=72)return;
+ tokens.forEach(other=>{
 
-    if(players[other.player].team===players[moved.player].team)
-      return;
+   if(other===moved)return;
 
-    if(globalIndex(other)===pos){
+   if(other.finished)return;
 
-      other.progress=-1;
-      other.state="base";
+   if(other.progress<0)return;
 
-      showMessage("⚡ कट गया!");
-    }
-  });
+   if(other.progress>=72)return;
+
+
+   /* PARTNER को नहीं काटना */
+
+   if(
+     players[other.player].team===
+     players[moved.player].team
+   ){
+     return;
+   }
+
+
+   if(globalPosition(other)===position){
+
+     other.progress=-1;
+
+     other.finished=false;
+
+     showMessage("⚡ Token कट गया!");
+
+   }
+
+ });
+
 }
 
-/* ---------------- TURN CHANGE ---------------- */
+
+/* =====================================
+   NEXT TURN
+   ===================================== */
 
 function nextTurn(){
 
-  diceValue=0;
+ diceValue=0;
 
-  currentPlayer=(currentPlayer+1)%6;
+ currentPlayer++;
 
-  updateTurn();
+ if(currentPlayer>=6){
+   currentPlayer=0;
+ }
+
+ updateTurn();
+
+ drawTokens();
+
 }
+
+
+/* =====================================
+   TURN TEXT
+   ===================================== */
 
 function updateTurn(custom){
 
-  const p=players[currentPlayer];
+ const player=players[currentPlayer];
 
-  let text=custom || `${p.name} की बारी • Dice दबाएँ`;
+ let text=
+   custom ||
+   player.name+" की बारी • Dice दबाएँ";
 
-  if(ownTokensDone(currentPlayer)){
-    text+=` • Partner ${players[partners[currentPlayer]].name} unlocked`;
-  }
 
-  turnText.textContent=text;
+ if(ownFinished(currentPlayer)){
+
+   text+=" • Partner "+
+   players[partner[currentPlayer]].name+
+   " unlocked";
+
+ }
+
+
+ turnBox.textContent=text;
+
 }
 
-/* ---------------- MESSAGE ---------------- */
 
-let messageTimer;
+/* =====================================
+   MESSAGE
+   ===================================== */
+
+let noticeTimer=null;
+
 
 function showMessage(text){
 
-  msg.textContent=text;
-  msg.classList.add("show");
+ notice.textContent=text;
 
-  clearTimeout(messageTimer);
+ notice.classList.add("show");
 
-  messageTimer=setTimeout(()=>{
-    hideMessage();
-  },900);
+ clearTimeout(noticeTimer);
+
+ noticeTimer=setTimeout(()=>{
+
+   hideMessage();
+
+ },900);
+
 }
+
 
 function hideMessage(){
-  msg.classList.remove("show");
+
+ notice.classList.remove("show");
+
 }
 
-/* ---------------- INITIAL DRAW ---------------- */
+
+/* =====================================
+   START
+   ===================================== */
 
 drawTokens();
+
 updateTurn();
 
-/* ---------------- DEBUG / RESET ---------------- */
 
-window.BHAICHARA={
-  players,
-  tokens,
-  reset(){
-    tokens.forEach(t=>{
-      t.state="base";
-      t.progress=-1;
-      t.finished=false;
-    });
+/* RESET FOR TESTING */
 
-    currentPlayer=0;
-    diceValue=0;
-    setDice(1);
-    drawTokens();
-    updateTurn();
-  }
+window.BHAICHARA_RESET=function(){
+
+ tokens.forEach(token=>{
+
+   token.progress=-1;
+
+   token.finished=false;
+
+ });
+
+ currentPlayer=0;
+
+ diceValue=0;
+
+ showDice(1);
+
+ drawTokens();
+
+ updateTurn();
+
 };
+
 </script>
 
 </body>
