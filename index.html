@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>BHAICHARA — 6 Player Ludo</title>
+<title>BHAICHARA</title>
 
 <style>
 *{
-  box-sizing:border-box;
   margin:0;
   padding:0;
+  box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
 }
 
@@ -17,95 +17,92 @@ html,body{
   width:100%;
   height:100%;
   overflow:hidden;
-  background:#050b10;
+  background:#02070d;
   font-family:Arial,sans-serif;
 }
 
-body{
+#game{
+  position:relative;
+  width:100vw;
+  height:100vh;
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
 }
 
-#app{
-  position:relative;
+canvas{
+  display:block;
   width:min(100vw,100vh);
   height:min(100vw,100vh);
 }
 
-canvas{
-  width:100%;
-  height:100%;
-  display:block;
-}
-
 .logo{
   position:absolute;
-  left:20px;
   top:12px;
-  color:#fff;
+  left:18px;
+  z-index:5;
+  color:white;
   font-size:clamp(20px,4vw,34px);
   font-weight:900;
   letter-spacing:3px;
-  text-shadow:0 4px 10px #000;
-  z-index:5;
+  text-shadow:0 3px 10px #000;
 }
 
 .online{
   position:absolute;
-  right:18px;
-  top:15px;
-  color:#53ff9e;
-  border:1px solid #53ff9e;
-  border-radius:25px;
-  padding:7px 15px;
-  background:#03100be8;
-  font-weight:800;
-  font-size:12px;
+  right:15px;
+  top:13px;
   z-index:5;
+  color:#48ff9b;
+  border:1px solid #48ff9b;
+  border-radius:30px;
+  padding:7px 14px;
+  background:#06130de8;
+  font-size:12px;
+  font-weight:bold;
 }
 
-.online span{
+.dot{
   display:inline-block;
   width:7px;
   height:7px;
-  background:#42ff98;
+  background:#48ff9b;
   border-radius:50%;
-  margin-right:6px;
-  box-shadow:0 0 10px #42ff98;
+  margin-right:5px;
+  box-shadow:0 0 9px #48ff9b;
 }
 
-.turn{
+.info{
   position:absolute;
-  bottom:9px;
+  bottom:10px;
   left:50%;
   transform:translateX(-50%);
-  color:white;
-  background:#050b10e8;
-  border:1px solid #ffffff35;
-  border-radius:22px;
-  padding:8px 18px;
+  z-index:5;
+  color:#fff;
+  background:#050b11e8;
+  border:1px solid #ffffff30;
+  border-radius:20px;
+  padding:8px 17px;
   font-size:12px;
   font-weight:bold;
   white-space:nowrap;
-  z-index:5;
 }
 </style>
 </head>
 
 <body>
 
-<div id="app">
+<div id="game">
 
 <canvas id="board"></canvas>
 
 <div class="logo">BHAICHARA</div>
 
 <div class="online">
-  <span></span>ONLINE
+  <span class="dot"></span>ONLINE
 </div>
 
-<div class="turn" id="turn">
+<div class="info" id="info">
   P1 की बारी • Dice दबाएँ
 </div>
 
@@ -113,145 +110,81 @@ canvas{
 
 <script>
 
-/* =========================================================
-   BHAICHARA
-   PURE JAVASCRIPT CANVAS BOARD
-   ========================================================= */
+const canvas=document.getElementById("board");
+const ctx=canvas.getContext("2d");
+const info=document.getElementById("info");
 
-const canvas = document.getElementById("board");
-const ctx = canvas.getContext("2d");
-const turnText = document.getElementById("turn");
+let size=0;
+let cx=0;
+let cy=0;
+let dice=1;
+let rolling=false;
 
-let W,H,S,CX,CY;
-
-/* ---------------------------------------------------------
-   PLAYERS
---------------------------------------------------------- */
-
-const players = [
-  {
-    name:"P1",
-    color:"#087cf0",
-    light:"#38a5ff",
-    angle:60,
-    team:0
-  },
-  {
-    name:"P2",
-    color:"#f0c400",
-    light:"#ffe44c",
-    angle:120,
-    team:1
-  },
-  {
-    name:"P3",
-    color:"#8427c7",
-    light:"#b44eff",
-    angle:180,
-    team:2
-  },
-  {
-    name:"P4",
-    color:"#e52229",
-    light:"#ff5b60",
-    angle:240,
-    team:0
-  },
-  {
-    name:"P5",
-    color:"#0aad55",
-    light:"#35dc7d",
-    angle:300,
-    team:1
-  },
-  {
-    name:"P6",
-    color:"#ed7116",
-    light:"#ff9b43",
-    angle:0,
-    team:2
-  }
+const players=[
+  {id:"P1",color:"#0879ed",light:"#35a7ff",angle:300},
+  {id:"P2",color:"#f0c400",light:"#ffe85b",angle:240},
+  {id:"P3",color:"#8629c7",light:"#b95aff",angle:180},
+  {id:"P4",color:"#e5292f",light:"#ff656a",angle:120},
+  {id:"P5",color:"#08aa55",light:"#39df80",angle:60},
+  {id:"P6",color:"#ee7117",light:"#ff9b48",angle:0}
 ];
 
-const partner = {
-  0:3,
-  3:0,
-  1:4,
-  4:1,
-  2:5,
-  5:2
-};
-
-/* ---------------------------------------------------------
-   RESIZE
---------------------------------------------------------- */
+/* ---------------- RESIZE ---------------- */
 
 function resize(){
 
-  const dpr = Math.min(window.devicePixelRatio || 1,2);
+  size=Math.min(window.innerWidth,window.innerHeight);
 
-  W = canvas.clientWidth;
-  H = canvas.clientHeight;
-  S = Math.min(W,H);
+  const dpr=Math.min(devicePixelRatio||1,2);
 
-  canvas.width = W*dpr;
-  canvas.height = H*dpr;
+  canvas.width=size*dpr;
+  canvas.height=size*dpr;
+
+  canvas.style.width=size+"px";
+  canvas.style.height=size+"px";
 
   ctx.setTransform(dpr,0,0,dpr,0,0);
 
-  CX=W/2;
-  CY=H/2;
+  cx=size/2;
+  cy=size/2;
 
   draw();
 }
 
 window.addEventListener("resize",resize);
 
-/* ---------------------------------------------------------
-   HELPERS
---------------------------------------------------------- */
+/* ---------------- HELPERS ---------------- */
 
-function rad(deg){
+function R(deg){
   return deg*Math.PI/180;
 }
 
-function point(cx,cy,r,angle){
+function pos(radius,angle){
 
-  const a=rad(angle-90);
+  const a=R(angle-90);
 
   return {
-    x:cx+r*Math.cos(a),
-    y:cy+r*Math.sin(a)
+    x:cx+Math.cos(a)*radius,
+    y:cy+Math.sin(a)*radius
   };
 }
 
-function polygon(points,fill,stroke=null,width=1){
+function hex(x,y,r,fill,stroke,lw){
 
   ctx.beginPath();
 
-  points.forEach((p,i)=>{
-    if(i===0)ctx.moveTo(p.x,p.y);
-    else ctx.lineTo(p.x,p.y);
-  });
+  for(let i=0;i<6;i++){
+
+    const a=R(i*60-30);
+
+    const px=x+Math.cos(a)*r;
+    const py=y+Math.sin(a)*r;
+
+    if(i===0)ctx.moveTo(px,py);
+    else ctx.lineTo(px,py);
+  }
 
   ctx.closePath();
-
-  if(fill){
-    ctx.fillStyle=fill;
-    ctx.fill();
-  }
-
-  if(stroke){
-    ctx.strokeStyle=stroke;
-    ctx.lineWidth=width;
-    ctx.stroke();
-  }
-}
-
-function roundedRect(x,y,w,h,r,fill,stroke=null,lw=1){
-
-  ctx.beginPath();
-  ctx.roundRect(x,y,w,h,r);
 
   ctx.fillStyle=fill;
   ctx.fill();
@@ -263,343 +196,215 @@ function roundedRect(x,y,w,h,r,fill,stroke=null,lw=1){
   }
 }
 
-/* ---------------------------------------------------------
-   BACKGROUND
---------------------------------------------------------- */
+/* ---------------- BACKGROUND ---------------- */
 
 function background(){
 
   const g=ctx.createRadialGradient(
-    CX,CY,S*.05,
-    CX,CY,S*.8
+    cx,cy,size*.05,
+    cx,cy,size*.75
   );
 
-  g.addColorStop(0,"#173b4c");
-  g.addColorStop(.45,"#091923");
-  g.addColorStop(1,"#02070b");
+  g.addColorStop(0,"#102c3b");
+  g.addColorStop(.5,"#06141e");
+  g.addColorStop(1,"#010509");
 
   ctx.fillStyle=g;
-  ctx.fillRect(0,0,W,H);
+  ctx.fillRect(0,0,size,size);
 
-  /* subtle golden light */
+  /* subtle rings */
 
-  const glow=ctx.createRadialGradient(
-    CX,CY,S*.2,
-    CX,CY,S*.72
-  );
+  for(let i=1;i<=5;i++){
 
-  glow.addColorStop(0,"rgba(255,180,40,.08)");
-  glow.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.beginPath();
 
-  ctx.fillStyle=glow;
-  ctx.fillRect(0,0,W,H);
+    ctx.arc(
+      cx,
+      cy,
+      size*(.46-i*.012),
+      0,
+      Math.PI*2
+    );
+
+    ctx.strokeStyle="rgba(70,130,160,.08)";
+    ctx.lineWidth=1;
+    ctx.stroke();
+  }
 }
 
-/* ---------------------------------------------------------
-   OUTER BOARD
---------------------------------------------------------- */
+/* ---------------- GOLD FRAME ---------------- */
 
-function outerBoard(){
+function frame(){
 
-  const R=S*.455;
-
-  ctx.save();
-
-  ctx.shadowColor="rgba(0,0,0,.8)";
-  ctx.shadowBlur=S*.025;
-  ctx.shadowOffsetY=S*.015;
-
-  ctx.beginPath();
-  ctx.arc(CX,CY,R,0,Math.PI*2);
-
-  const gold=ctx.createLinearGradient(
-    CX-R,CY-R,
-    CX+R,CY+R
-  );
-
-  gold.addColorStop(0,"#8a5712");
-  gold.addColorStop(.25,"#e3a52d");
-  gold.addColorStop(.5,"#ffe58a");
-  gold.addColorStop(.7,"#d48f1e");
-  gold.addColorStop(1,"#70420d");
-
-  ctx.fillStyle="#06131d";
-  ctx.fill();
-
-  ctx.strokeStyle=gold;
-  ctx.lineWidth=S*.018;
-  ctx.stroke();
-
-  ctx.restore();
-
-  ctx.beginPath();
-  ctx.arc(CX,CY,R*.94,0,Math.PI*2);
-
-  ctx.strokeStyle="#35596d";
-  ctx.lineWidth=S*.006;
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.arc(CX,CY,R*.88,0,Math.PI*2);
-
-  ctx.strokeStyle="#06131d";
-  ctx.lineWidth=S*.035;
-  ctx.stroke();
-}
-
-/* ---------------------------------------------------------
-   SIX HOME SECTORS
---------------------------------------------------------- */
-
-function homeSector(player){
-
-  const R1=S*.145;
-  const R2=S*.405;
-
-  const a=player.angle;
-
-  const p1=point(CX,CY,R1,a-28);
-  const p2=point(CX,CY,R2,a-28);
-  const p3=point(CX,CY,R2,a+28);
-  const p4=point(CX,CY,R1,a+28);
-
-  const grad=ctx.createLinearGradient(
-    p2.x,p2.y,
-    p3.x,p3.y
-  );
-
-  grad.addColorStop(0,player.light);
-  grad.addColorStop(.5,player.color);
-  grad.addColorStop(1,"#111");
-
-  polygon(
-    [p1,p2,p3,p4],
-    grad,
-    "#06131c",
-    S*.005
-  );
-
-  /* inner highlight */
-
-  const q1=point(CX,CY,R1+S*.01,a-23);
-  const q2=point(CX,CY,R2-S*.025,a-23);
-  const q3=point(CX,CY,R2-S*.025,a+23);
-  const q4=point(CX,CY,R1+S*.01,a+23);
-
-  polygon(
-    [q1,q2,q3,q4],
-    player.color,
-    null
-  );
-}
-
-function allHomes(){
-
-  players.forEach(homeSector);
-}
-
-/* ---------------------------------------------------------
-   PLAYER HOME TOKEN AREA
---------------------------------------------------------- */
-
-function homeBase(player){
-
-  const pos=point(
-    CX,
-    CY,
-    S*.382,
-    player.angle
-  );
+  const r=size*.455;
 
   ctx.save();
 
   ctx.shadowColor="#000";
-  ctx.shadowBlur=S*.025;
+  ctx.shadowBlur=size*.025;
 
-  ctx.beginPath();
-  ctx.arc(
-    pos.x,
-    pos.y,
-    S*.052,
-    0,
-    Math.PI*2
+  const gold=ctx.createLinearGradient(
+    cx-r,cy-r,
+    cx+r,cy+r
   );
 
-  ctx.fillStyle="#061019";
+  gold.addColorStop(0,"#81520f");
+  gold.addColorStop(.25,"#e4a62b");
+  gold.addColorStop(.5,"#ffe98a");
+  gold.addColorStop(.72,"#d28c1d");
+  gold.addColorStop(1,"#75460d");
+
+  ctx.beginPath();
+  ctx.arc(cx,cy,r,0,Math.PI*2);
+
+  ctx.fillStyle="#07141e";
   ctx.fill();
 
-  ctx.strokeStyle="#ffffff30";
-  ctx.lineWidth=S*.003;
+  ctx.strokeStyle=gold;
+  ctx.lineWidth=size*.014;
   ctx.stroke();
 
   ctx.restore();
 
-  const gap=S*.026;
+  ctx.beginPath();
+  ctx.arc(cx,cy,r*.95,0,Math.PI*2);
 
-  const places=[
-    [-gap,-gap],
-    [gap,-gap],
-    [-gap,gap],
-    [gap,gap]
-  ];
-
-  places.forEach(([dx,dy])=>{
-    token(
-      pos.x+dx,
-      pos.y+dy,
-      player,
-      S*.022
-    );
-  });
-
-  ctx.fillStyle="#fff";
-  ctx.font=`900 ${S*.021}px Arial`;
-  ctx.textAlign="center";
-  ctx.textBaseline="middle";
-
-  const label=point(
-    CX,
-    CY,
-    S*.435,
-    player.angle
-  );
-
-  ctx.fillText(
-    player.name,
-    label.x,
-    label.y
-  );
+  ctx.strokeStyle="#34586c";
+  ctx.lineWidth=size*.005;
+  ctx.stroke();
 }
 
-/* ---------------------------------------------------------
-   TOKEN
---------------------------------------------------------- */
+/* ---------------- SIX HOME ZONES ---------------- */
 
-function token(x,y,player,r){
+function home(player){
 
-  ctx.save();
+  const outer=size*.405;
+  const inner=size*.115;
+  const width=27;
 
-  ctx.shadowColor="rgba(0,0,0,.7)";
-  ctx.shadowBlur=r*.8;
-  ctx.shadowOffsetY=r*.4;
+  const p1=pos(inner,player.angle-width);
+  const p2=pos(outer,player.angle-width);
+  const p3=pos(outer,player.angle+width);
+  const p4=pos(inner,player.angle+width);
 
-  const g=ctx.createRadialGradient(
-    x-r*.45,
-    y-r*.55,
-    r*.1,
-    x,
-    y,
-    r*1.2
+  const gradient=ctx.createLinearGradient(
+    p2.x,p2.y,
+    p3.x,p3.y
   );
 
-  g.addColorStop(0,"#fff");
-  g.addColorStop(.08,player.light);
-  g.addColorStop(.45,player.color);
-  g.addColorStop(1,"#111");
+  gradient.addColorStop(0,player.light);
+  gradient.addColorStop(.5,player.color);
+  gradient.addColorStop(1,"#101820");
 
   ctx.beginPath();
-  ctx.arc(x,y,r,0,Math.PI*2);
 
-  ctx.fillStyle=g;
+  ctx.moveTo(p1.x,p1.y);
+  ctx.lineTo(p2.x,p2.y);
+  ctx.lineTo(p3.x,p3.y);
+  ctx.lineTo(p4.x,p4.y);
+  ctx.closePath();
+
+  ctx.fillStyle=gradient;
   ctx.fill();
 
-  ctx.restore();
-
-  /* outer ring */
-
-  ctx.beginPath();
-  ctx.arc(x,y,r*.68,0,Math.PI*2);
-
-  ctx.strokeStyle="#fff";
-  ctx.lineWidth=Math.max(1,r*.11);
+  ctx.strokeStyle="#061019";
+  ctx.lineWidth=size*.006;
   ctx.stroke();
 
-  /* highlight */
+  /* inner shadow */
+
+  const q1=pos(size*.14,player.angle-width+3);
+  const q2=pos(size*.375,player.angle-width+3);
+  const q3=pos(size*.375,player.angle+width-3);
+  const q4=pos(size*.14,player.angle+width-3);
 
   ctx.beginPath();
-  ctx.ellipse(
-    x-r*.28,
-    y-r*.38,
-    r*.25,
-    r*.12,
-    -.35,
-    0,
-    Math.PI*2
-  );
 
-  ctx.fillStyle="rgba(255,255,255,.65)";
+  ctx.moveTo(q1.x,q1.y);
+  ctx.lineTo(q2.x,q2.y);
+  ctx.lineTo(q3.x,q3.y);
+  ctx.lineTo(q4.x,q4.y);
+  ctx.closePath();
+
+  ctx.fillStyle=player.color;
+  ctx.globalAlpha=.78;
   ctx.fill();
+  ctx.globalAlpha=1;
 }
 
-/* ---------------------------------------------------------
-   TRACK
---------------------------------------------------------- */
+/* ---------------- TRACK ---------------- */
 
-const TRACK_COUNT=72;
+const TRACK=72;
 
-function trackPoint(i){
+function trackPosition(index){
 
-  const angle=-90+i*(360/TRACK_COUNT);
-
-  return point(
-    CX,
-    CY,
-    S*.323,
-    angle
+  return pos(
+    size*.305,
+    -90+index*(360/TRACK)+90
   );
 }
 
-function track(){
+function drawTrack(){
 
-  const cell=S*.034;
+  const cell=size*.034;
 
-  for(let i=0;i<TRACK_COUNT;i++){
+  for(let i=0;i<TRACK;i++){
 
-    const p=trackPoint(i);
+    const p=trackPosition(i);
 
-    let owner=-1;
+    let player=-1;
 
-    players.forEach((pl,index)=>{
+    for(let j=0;j<6;j++){
 
-      const start=index*12;
+      if(i===j*12)
+        player=j;
+    }
 
-      if(i===start)
-        owner=index;
+    ctx.beginPath();
 
-    });
-
-    roundedRect(
+    ctx.roundRect(
       p.x-cell/2,
       p.y-cell/2,
       cell,
       cell,
-      cell*.15,
-      owner>=0
-        ? players[owner].color
-        : "#edf3f5",
-      "#263741",
-      S*.0015
+      cell*.12
     );
 
-    if(owner<0){
+    ctx.fillStyle=
+      player>=0
+      ? players[player].color
+      : "#eef3f5";
 
-      roundedRect(
-        p.x-cell*.36,
-        p.y-cell*.36,
-        cell*.72,
-        cell*.18,
-        2,
-        "rgba(255,255,255,.35)"
+    ctx.fill();
+
+    ctx.strokeStyle="#1b2b34";
+    ctx.lineWidth=size*.0015;
+    ctx.stroke();
+
+    if(player<0){
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        p.x-cell*.28,
+        p.y-cell*.27
       );
+
+      ctx.lineTo(
+        p.x+cell*.25,
+        p.y-cell*.27
+      );
+
+      ctx.strokeStyle="rgba(255,255,255,.45)";
+      ctx.lineWidth=1;
+      ctx.stroke();
     }
   }
 }
 
-/* ---------------------------------------------------------
-   12 SAFE STARS
---------------------------------------------------------- */
+/* ---------------- SAFE STARS ---------------- */
 
-function star(x,y,r,color="#ffd943"){
+function star(x,y,r){
 
   ctx.save();
 
@@ -621,273 +426,326 @@ function star(x,y,r,color="#ffd943"){
 
   ctx.closePath();
 
-  ctx.fillStyle=color;
-  ctx.shadowColor=color;
-  ctx.shadowBlur=r*.4;
+  ctx.fillStyle="#ffd83d";
+  ctx.shadowColor="#ffd83d";
+  ctx.shadowBlur=r*.7;
   ctx.fill();
 
   ctx.restore();
 }
 
-function safeStars(){
+function safeSpots(){
 
-  const safeIndexes=[];
+  for(let p=0;p<6;p++){
 
-  for(let i=0;i<6;i++){
+    [p*12,p*12+6].forEach(index=>{
 
-    safeIndexes.push(i*12);
-    safeIndexes.push(i*12+6);
-  }
+      const q=trackPosition(index);
 
-  safeIndexes.forEach(i=>{
-
-    const p=trackPoint(i);
-
-    star(
-      p.x,
-      p.y,
-      S*.012
-    );
-  });
-}
-
-/* ---------------------------------------------------------
-   ARROWS
---------------------------------------------------------- */
-
-function arrow(x,y,angle,color){
-
-  ctx.save();
-
-  ctx.translate(x,y);
-  ctx.rotate(rad(angle));
-
-  ctx.fillStyle=color;
-
-  ctx.beginPath();
-  ctx.moveTo(S*.012,0);
-  ctx.lineTo(-S*.007,-S*.007);
-  ctx.lineTo(-S*.003,0);
-  ctx.lineTo(-S*.007,S*.007);
-  ctx.closePath();
-
-  ctx.fill();
-
-  ctx.restore();
-}
-
-function arrows(){
-
-  players.forEach((p,i)=>{
-
-    const index=i*12+9;
-    const pos=trackPoint(index);
-
-    arrow(
-      pos.x,
-      pos.y,
-      index*5,
-      p.color
-    );
-  });
-}
-
-/* ---------------------------------------------------------
-   COLORED HOME LANES
---------------------------------------------------------- */
-
-function homeLane(player){
-
-  for(let n=1;n<=6;n++){
-
-    const r=S*(.265-n*.024);
-
-    const pos=point(
-      CX,
-      CY,
-      r,
-      player.angle
-    );
-
-    const size=S*.031;
-
-    roundedRect(
-      pos.x-size/2,
-      pos.y-size/2,
-      size,
-      size,
-      size*.13,
-      player.color,
-      "#172630",
-      S*.0015
-    );
+      star(q.x,q.y,size*.012);
+    });
   }
 }
+
+/* ---------------- HOME LANES ---------------- */
 
 function lanes(){
 
-  players.forEach(homeLane);
+  players.forEach(player=>{
+
+    for(let i=1;i<=6;i++){
+
+      const q=pos(
+        size*(.265-i*.024),
+        player.angle
+      );
+
+      const s=size*.031;
+
+      ctx.beginPath();
+
+      ctx.roundRect(
+        q.x-s/2,
+        q.y-s/2,
+        s,
+        s,
+        s*.12
+      );
+
+      ctx.fillStyle=player.color;
+      ctx.fill();
+
+      ctx.strokeStyle="#172630";
+      ctx.lineWidth=1;
+      ctx.stroke();
+    }
+  });
 }
 
-/* ---------------------------------------------------------
-   CENTER
---------------------------------------------------------- */
+/* ---------------- TOKENS ---------------- */
 
-function center(){
-
-  const r=S*.105;
+function token(x,y,player,r){
 
   ctx.save();
 
-  ctx.shadowColor="#000";
-  ctx.shadowBlur=S*.025;
+  ctx.shadowColor="rgba(0,0,0,.8)";
+  ctx.shadowBlur=r*.8;
+  ctx.shadowOffsetY=r*.4;
 
-  ctx.beginPath();
-
-  for(let i=0;i<6;i++){
-
-    const p=point(
-      CX,
-      CY,
-      r,
-      i*60
-    );
-
-    if(i===0)ctx.moveTo(p.x,p.y);
-    else ctx.lineTo(p.x,p.y);
-  }
-
-  ctx.closePath();
-
-  const g=ctx.createLinearGradient(
-    CX-r,CY-r,
-    CX+r,CY+r
+  const g=ctx.createRadialGradient(
+    x-r*.4,
+    y-r*.5,
+    r*.05,
+    x,
+    y,
+    r
   );
 
-  g.addColorStop(0,"#0d2d43");
-  g.addColorStop(.45,"#0d7ce0");
-  g.addColorStop(1,"#064078");
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.12,player.light);
+  g.addColorStop(.52,player.color);
+  g.addColorStop(1,"#101010");
+
+  ctx.beginPath();
+  ctx.arc(x,y,r,0,Math.PI*2);
 
   ctx.fillStyle=g;
   ctx.fill();
 
-  ctx.strokeStyle="#f0b738";
-  ctx.lineWidth=S*.008;
-  ctx.stroke();
-
   ctx.restore();
 
-  /* blue inner ring */
+  ctx.beginPath();
+  ctx.arc(x,y,r*.65,0,Math.PI*2);
+
+  ctx.strokeStyle="#ffffff";
+  ctx.lineWidth=Math.max(1,r*.09);
+  ctx.stroke();
 
   ctx.beginPath();
-  ctx.arc(CX,CY,r*.68,0,Math.PI*2);
 
-  const blue=ctx.createRadialGradient(
-    CX,CY,r*.1,
-    CX,CY,r*.68
+  ctx.arc(
+    x-r*.3,
+    y-r*.36,
+    r*.13,
+    0,
+    Math.PI*2
   );
 
-  blue.addColorStop(0,"#54c4ff");
-  blue.addColorStop(.5,"#087de0");
-  blue.addColorStop(1,"#032c59");
+  ctx.fillStyle="rgba(255,255,255,.7)";
+  ctx.fill();
+}
+
+/* ---------------- PLAYER BASES ---------------- */
+
+function bases(){
+
+  players.forEach(player=>{
+
+    const p=pos(size*.405,player.angle);
+
+    ctx.save();
+
+    ctx.shadowColor="#000";
+    ctx.shadowBlur=size*.02;
+
+    ctx.beginPath();
+    ctx.arc(
+      p.x,
+      p.y,
+      size*.052,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fillStyle="#061019";
+    ctx.fill();
+
+    ctx.strokeStyle="#ffffff25";
+    ctx.lineWidth=2;
+    ctx.stroke();
+
+    ctx.restore();
+
+    const gap=size*.023;
+
+    token(p.x-gap,p.y-gap,player,size*.021);
+    token(p.x+gap,p.y-gap,player,size*.021);
+    token(p.x-gap,p.y+gap,player,size*.021);
+    token(p.x+gap,p.y+gap,player,size*.021);
+
+    const label=pos(size*.448,player.angle);
+
+    ctx.fillStyle="#fff";
+    ctx.font=`900 ${size*.021}px Arial`;
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+
+    ctx.fillText(
+      player.id,
+      label.x,
+      label.y
+    );
+  });
+}
+
+/* ---------------- CENTER DICE ---------------- */
+
+function center(){
+
+  const r=size*.095;
+
+  hex(
+    cx,
+    cy,
+    r,
+    "#06121b",
+    "#e8b63d",
+    size*.008
+  );
+
+  hex(
+    cx,
+    cy,
+    r*.78,
+    "#087edc",
+    "#68c9ff",
+    size*.004
+  );
+
+  ctx.beginPath();
+
+  ctx.arc(
+    cx,
+    cy,
+    r*.53,
+    0,
+    Math.PI*2
+  );
+
+  const blue=ctx.createRadialGradient(
+    cx-r*.2,
+    cy-r*.2,
+    r*.05,
+    cx,
+    cy,
+    r*.55
+  );
+
+  blue.addColorStop(0,"#5bc7ff");
+  blue.addColorStop(.45,"#087fe0");
+  blue.addColorStop(1,"#033a71");
 
   ctx.fillStyle=blue;
   ctx.fill();
 
-  ctx.strokeStyle="#74d5ff";
-  ctx.lineWidth=S*.004;
+  ctx.strokeStyle="#91ddff";
+  ctx.lineWidth=size*.003;
   ctx.stroke();
 
   drawDice();
 }
 
-/* ---------------------------------------------------------
-   3D DICE
---------------------------------------------------------- */
-
-let diceNumber=1;
+/* ---------------- DICE ---------------- */
 
 function drawDice(){
 
-  const r=S*.043;
+  const r=size*.043;
 
   ctx.save();
 
-  ctx.shadowColor="rgba(0,0,0,.7)";
-  ctx.shadowBlur=S*.015;
-  ctx.shadowOffsetY=S*.008;
+  ctx.shadowColor="#000";
+  ctx.shadowBlur=size*.012;
+  ctx.shadowOffsetY=size*.006;
 
-  /* cube body */
+  ctx.beginPath();
 
-  roundedRect(
-    CX-r,
-    CY-r,
+  ctx.roundRect(
+    cx-r,
+    cy-r,
     r*2,
     r*2,
-    r*.2,
-    "#f5f8fa",
-    "#d4e0e6",
-    S*.002
+    r*.18
   );
+
+  ctx.fillStyle="#f8fafb";
+  ctx.fill();
+
+  ctx.strokeStyle="#c7d7df";
+  ctx.lineWidth=2;
+  ctx.stroke();
 
   ctx.restore();
 
-  const patterns={
+  const spots={
     1:[[0,0]],
-    2:[[-.3,-.3],[.3,.3]],
-    3:[[-.3,-.3],[0,0],[.3,.3]],
-    4:[[-.3,-.3],[.3,-.3],[-.3,.3],[.3,.3]],
-    5:[[-.3,-.3],[.3,-.3],[0,0],[-.3,.3],[.3,.3]],
-    6:[[-.3,-.32],[.3,-.32],[-.3,0],[.3,0],[-.3,.32],[.3,.32]]
+    2:[[-.32,-.32],[.32,.32]],
+    3:[[-.32,-.32],[0,0],[.32,.32]],
+    4:[[-.32,-.32],[.32,-.32],[-.32,.32],[.32,.32]],
+    5:[[-.32,-.32],[.32,-.32],[0,0],[-.32,.32],[.32,.32]],
+    6:[[-.32,-.32],[.32,-.32],[-.32,0],[.32,0],[-.32,.32],[.32,.32]]
   };
 
-  patterns[diceNumber].forEach(([px,py])=>{
+  spots[dice].forEach(s=>{
 
     ctx.beginPath();
 
     ctx.arc(
-      CX+px*r*1.45,
-      CY+py*r*1.45,
-      r*.11,
+      cx+s[0]*r*1.4,
+      cy+s[1]*r*1.4,
+      r*.095,
       0,
       Math.PI*2
     );
 
-    ctx.fillStyle="#d10d16";
+    ctx.fillStyle="#d31c25";
     ctx.fill();
   });
 }
 
-/* ---------------------------------------------------------
-   ALL HOME BASES
---------------------------------------------------------- */
+/* ---------------- ARROWS ---------------- */
 
-function bases(){
+function arrows(){
 
-  players.forEach(homeBase);
+  players.forEach((player,i)=>{
+
+    const q=trackPosition(i*12+9);
+
+    ctx.save();
+
+    ctx.translate(q.x,q.y);
+
+    ctx.rotate(R(i*60));
+
+    ctx.fillStyle=player.color;
+
+    ctx.beginPath();
+    ctx.moveTo(size*.012,0);
+    ctx.lineTo(-size*.007,-size*.006);
+    ctx.lineTo(-size*.003,0);
+    ctx.lineTo(-size*.007,size*.006);
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.restore();
+  });
 }
 
-/* ---------------------------------------------------------
-   DRAW
---------------------------------------------------------- */
+/* ---------------- DRAW ---------------- */
 
 function draw(){
 
-  if(!W)return;
-
-  ctx.clearRect(0,0,W,H);
-
   background();
 
-  outerBoard();
+  frame();
 
-  allHomes();
+  players.forEach(home);
 
-  track();
+  drawTrack();
 
   lanes();
 
-  safeStars();
+  safeSpots();
 
   arrows();
 
@@ -896,9 +754,7 @@ function draw(){
   center();
 }
 
-/* ---------------------------------------------------------
-   DICE CLICK
---------------------------------------------------------- */
+/* ---------------- DICE CLICK ---------------- */
 
 canvas.addEventListener("click",e=>{
 
@@ -907,22 +763,14 @@ canvas.addEventListener("click",e=>{
   const x=e.clientX-rect.left;
   const y=e.clientY-rect.top;
 
-  const dx=x-CX;
-  const dy=y-CY;
+  const d=Math.hypot(x-cx,y-cy);
 
-  const distance=Math.sqrt(dx*dx+dy*dy);
-
-  if(distance<S*.13){
-
+  if(d<size*.13){
     rollDice();
   }
 });
 
-/* ---------------------------------------------------------
-   DICE ROLL
---------------------------------------------------------- */
-
-let rolling=false;
+/* ---------------- ROLL ---------------- */
 
 function rollDice(){
 
@@ -930,38 +778,32 @@ function rollDice(){
 
   rolling=true;
 
-  let count=0;
+  let n=0;
 
   const timer=setInterval(()=>{
 
-    diceNumber=
-      Math.floor(Math.random()*6)+1;
+    dice=Math.floor(Math.random()*6)+1;
 
     draw();
 
-    count++;
+    n++;
 
-    if(count>=12){
+    if(n>=12){
 
       clearInterval(timer);
 
-      diceNumber=
-        Math.floor(Math.random()*6)+1;
+      dice=Math.floor(Math.random()*6)+1;
 
       draw();
 
       rolling=false;
 
-      turnText.textContent=
-        `P1 की बारी • ${diceNumber} आया • Token चुनें`;
+      info.textContent=
+        `P1 की बारी • ${dice} आया • Token चुनें`;
     }
 
-  },70);
+  },65);
 }
-
-/* ---------------------------------------------------------
-   START
---------------------------------------------------------- */
 
 resize();
 
