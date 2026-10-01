@@ -1,1 +1,335 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>BHAICHARA — 6 Player Ludo</title>
 
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#101722;
+  font-family:Arial,sans-serif;
+  color:white;
+  overflow:hidden;
+}
+.game{
+  width:min(96vw,760px);
+  text-align:center;
+}
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+.logo{
+  font-size:25px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+.status{
+  font-size:12px;
+  background:#162b24;
+  border:1px solid #35d98a;
+  color:#65efad;
+  padding:6px 12px;
+  border-radius:20px;
+}
+.board{
+  position:relative;
+  width:min(94vw,680px);
+  aspect-ratio:1;
+  margin:auto;
+  border-radius:32px;
+  padding:8px;
+  background:#202b39;
+  box-shadow:0 20px 50px #000b,inset 0 0 0 2px #ffffff12;
+}
+.track{
+  position:absolute;
+  inset:8%;
+  border-radius:50%;
+  background:
+    repeating-conic-gradient(
+      from -15deg,
+      #344354 0deg 7.5deg,
+      #273443 7.5deg 15deg
+    );
+  border:10px solid #111a25;
+  box-shadow:inset 0 0 30px #000;
+}
+.inner{
+  position:absolute;
+  inset:22%;
+  border-radius:50%;
+  background:#18222e;
+  border:5px solid #39495b;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.center{
+  width:34%;
+  aspect-ratio:1;
+  border-radius:50%;
+  background:radial-gradient(circle,#4b8cff,#174a9e 60%,#071c40);
+  border:7px solid #79aaff;
+  box-shadow:0 0 25px #2680ff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:clamp(34px,8vw,58px);
+  user-select:none;
+}
+.zone{
+  position:absolute;
+  width:31%;
+  height:31%;
+  border-radius:22px;
+  padding:10px;
+  box-shadow:0 10px 25px #0008,inset 0 0 0 3px #ffffff28;
+}
+.zone h3{
+  font-size:13px;
+  margin-bottom:7px;
+  text-shadow:0 2px 3px #000;
+}
+.red{background:#a91422;top:4%;left:34.5%}
+.green{background:#168448;top:20%;right:4%}
+.orange{background:#c75b13;bottom:20%;right:4%}
+.blue{background:#1458a8;bottom:4%;left:34.5%}
+.yellow{background:#b88b05;bottom:20%;left:4%}
+.purple{background:#66358f;top:20%;left:4%}
+
+.tokens{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:7px;
+  width:72px;
+  margin:auto;
+}
+.token{
+  width:29px;
+  height:29px;
+  border-radius:50%;
+  border:3px solid #fff8;
+  box-shadow:0 3px 6px #0009,inset 0 2px 3px #fff8;
+}
+.token.red{background:#9b1723}
+.token.green{background:#178047}
+.token.orange{background:#c35b18}
+.token.blue{background:#155aa8}
+.token.yellow{background:#b48b08}
+.token.purple{background:#68358c}
+
+.star{
+  position:absolute;
+  width:34px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  filter:drop-shadow(0 2px 3px #000);
+}
+.s1{top:37%;left:12%}
+.s2{top:16%;left:31%}
+.s3{top:12%;right:31%}
+.s4{top:37%;right:12%}
+.s5{bottom:37%;right:12%}
+.s6{bottom:16%;right:31%}
+.s7{bottom:12%;left:31%}
+.s8{bottom:37%;left:12%}
+.s9{top:29%;left:28%}
+.s10{top:29%;right:28%}
+.s11{bottom:29%;right:28%}
+.s12{bottom:29%;left:28%}
+
+.controls{
+  margin-top:13px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+}
+button{
+  border:0;
+  border-radius:14px;
+  padding:12px 20px;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+  color:white;
+}
+.roll{
+  background:#159b58;
+  box-shadow:0 5px 15px #159b5866;
+}
+.roll:active{transform:scale(.96)}
+.message{
+  margin-top:9px;
+  font-size:14px;
+  color:#c9d3df;
+}
+.team{
+  margin-top:8px;
+  font-size:12px;
+  color:#8f9aaa;
+}
+
+@media(max-width:500px){
+  .board{width:94vw;border-radius:24px}
+  .zone{border-radius:15px;padding:6px}
+  .zone h3{font-size:10px}
+  .tokens{gap:4px;width:54px}
+  .token{width:22px;height:22px;border-width:2px}
+  .star{font-size:18px;width:26px;height:26px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+  <div class="top">
+    <div class="logo">BHAICHARA</div>
+    <div class="status">● OFFLINE</div>
+  </div>
+
+  <div class="board">
+
+    <!-- 6 PLAYER HOME ZONES -->
+
+    <div class="zone red">
+      <h3>PLAYER 4</h3>
+      <div class="tokens">
+        <span class="token red"></span>
+        <span class="token red"></span>
+        <span class="token red"></span>
+        <span class="token red"></span>
+      </div>
+    </div>
+
+    <div class="zone green">
+      <h3>PLAYER 5</h3>
+      <div class="tokens">
+        <span class="token green"></span>
+        <span class="token green"></span>
+        <span class="token green"></span>
+        <span class="token green"></span>
+      </div>
+    </div>
+
+    <div class="zone orange">
+      <h3>PLAYER 6</h3>
+      <div class="tokens">
+        <span class="token orange"></span>
+        <span class="token orange"></span>
+        <span class="token orange"></span>
+        <span class="token orange"></span>
+      </div>
+    </div>
+
+    <div class="zone blue">
+      <h3>PLAYER 1</h3>
+      <div class="tokens">
+        <span class="token blue"></span>
+        <span class="token blue"></span>
+        <span class="token blue"></span>
+        <span class="token blue"></span>
+      </div>
+    </div>
+
+    <div class="zone yellow">
+      <h3>PLAYER 2</h3>
+      <div class="tokens">
+        <span class="token yellow"></span>
+        <span class="token yellow"></span>
+        <span class="token yellow"></span>
+        <span class="token yellow"></span>
+      </div>
+    </div>
+
+    <div class="zone purple">
+      <h3>PLAYER 3</h3>
+      <div class="tokens">
+        <span class="token purple"></span>
+        <span class="token purple"></span>
+        <span class="token purple"></span>
+        <span class="token purple"></span>
+      </div>
+    </div>
+
+    <!-- 12 SAFE POSITIONS -->
+
+    <div class="star s1">⭐</div>
+    <div class="star s2">⭐</div>
+    <div class="star s3">⭐</div>
+    <div class="star s4">⭐</div>
+    <div class="star s5">⭐</div>
+    <div class="star s6">⭐</div>
+    <div class="star s7">⭐</div>
+    <div class="star s8">⭐</div>
+    <div class="star s9">⭐</div>
+    <div class="star s10">⭐</div>
+    <div class="star s11">⭐</div>
+    <div class="star s12">⭐</div>
+
+    <div class="track"></div>
+
+    <div class="inner">
+      <div class="center" id="dice">⚄</div>
+    </div>
+
+  </div>
+
+  <div class="controls">
+    <button class="roll" onclick="rollDice()">🎲 ROLL DICE</button>
+  </div>
+
+  <div class="message" id="message">
+    PLAYER 1 — आपकी Turn
+  </div>
+
+  <div class="team">
+    Teams: P1 + P4 &nbsp; | &nbsp; P2 + P5 &nbsp; | &nbsp; P3 + P6
+  </div>
+
+</div>
+
+<script>
+const diceFaces = ["⚀","⚁","⚂","⚃","⚄","⚅"];
+
+let currentPlayer = 1;
+
+function rollDice(){
+
+  const number = Math.floor(Math.random()*6);
+
+  document.getElementById("dice").textContent = diceFaces[number];
+
+  if(number === 5){
+    document.getElementById("message").textContent =
+      "PLAYER " + currentPlayer + " — 6 आया! Extra Turn 🔥";
+    return;
+  }
+
+  document.getElementById("message").textContent =
+    "PLAYER " + currentPlayer + " — " + (number+1) +
+    " आया | अब Goti Move करें";
+
+  currentPlayer++;
+
+  if(currentPlayer > 6){
+    currentPlayer = 1;
+  }
+}
+</script>
+
+</body>
+</html>
