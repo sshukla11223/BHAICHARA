@@ -1,92 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>BHAICHARA</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  touch-action:manipulation;
-}
-
+*{box-sizing:border-box}
 html,body{
+  margin:0;
   width:100%;
   height:100%;
   overflow:hidden;
-  background:#02070d;
-  font-family:Arial,Helvetica,sans-serif;
+  background:#02070c;
+  font-family:Arial,sans-serif;
 }
-
-#app{
-  width:100vw;
-  height:100vh;
+body{
   display:flex;
   justify-content:center;
   align-items:center;
-  position:relative;
 }
-
-canvas{
-  display:block;
+#game{
+  position:relative;
   width:min(100vw,100vh);
   height:min(100vw,100vh);
 }
-
-.title{
+canvas{
+  width:100%;
+  height:100%;
+  display:block;
+}
+.brand{
   position:absolute;
-  top:10px;
+  top:13px;
   left:18px;
   color:#fff;
-  font-size:clamp(22px,4vw,36px);
   font-weight:900;
+  font-size:clamp(22px,5vw,38px);
   letter-spacing:3px;
-  z-index:10;
-  text-shadow:0 3px 8px #000;
+  text-shadow:0 3px 10px #000;
 }
-
 .online{
   position:absolute;
-  top:12px;
   right:16px;
-  color:#50ff9d;
-  border:1px solid #50ff9d;
+  top:15px;
+  padding:8px 15px;
+  border:1px solid #46ff99;
   border-radius:25px;
-  padding:7px 14px;
-  font-size:13px;
+  color:#46ff99;
+  background:#04150de8;
   font-weight:bold;
-  background:#06130de8;
-  z-index:10;
+  font-size:13px;
 }
-
-.online i{
+.online span{
   display:inline-block;
   width:8px;
   height:8px;
   border-radius:50%;
-  background:#50ff9d;
-  box-shadow:0 0 9px #50ff9d;
-  margin-right:5px;
+  background:#46ff99;
+  box-shadow:0 0 10px #46ff99;
+  margin-right:6px;
 }
-
-.status{
+.info{
   position:absolute;
-  bottom:8px;
+  bottom:9px;
   left:50%;
   transform:translateX(-50%);
+  background:#02070ddd;
   color:white;
-  background:#050b11ed;
   border:1px solid #ffffff30;
-  border-radius:20px;
-  padding:8px 18px;
+  border-radius:22px;
+  padding:8px 16px;
   font-size:12px;
-  font-weight:bold;
-  z-index:10;
   white-space:nowrap;
 }
 </style>
@@ -94,20 +79,18 @@ canvas{
 
 <body>
 
-<div id="app">
+<div id="game">
+  <canvas id="board"></canvas>
 
-<canvas id="board"></canvas>
+  <div class="brand">BHAICHARA</div>
 
-<div class="title">BHAICHARA</div>
+  <div class="online">
+    <span></span>ONLINE
+  </div>
 
-<div class="online">
-  <i></i>ONLINE
-</div>
-
-<div class="status" id="status">
-  P1 की बारी • Dice दबाएँ
-</div>
-
+  <div class="info" id="info">
+    P1 की बारी • Dice दबाएँ
+  </div>
 </div>
 
 <script>
@@ -115,108 +98,69 @@ canvas{
 const canvas=document.getElementById("board");
 const ctx=canvas.getContext("2d");
 
-let W=0;
-let H=0;
-let S=0;
-let CX=0;
-let CY=0;
+let size=0;
+let cx=0;
+let cy=0;
+let dice=6;
 
-const COLORS=[
-  {
-    id:"P1",
-    color:"#087BEF",
-    light:"#45B5FF",
-    dark:"#034B9A",
-    angle:-30
-  },
-  {
-    id:"P2",
-    color:"#F0C400",
-    light:"#FFE45A",
-    dark:"#A57E00",
-    angle:-90
-  },
-  {
-    id:"P3",
-    color:"#8526C7",
-    light:"#C15BFF",
-    dark:"#50157D",
-    angle:-150
-  },
-  {
-    id:"P4",
-    color:"#E52C32",
-    light:"#FF686D",
-    dark:"#8D161B",
-    angle:150
-  },
-  {
-    id:"P5",
-    color:"#0AA956",
-    light:"#45E681",
-    dark:"#056A37",
-    angle:90
-  },
-  {
-    id:"P6",
-    color:"#EF7418",
-    light:"#FFAA5C",
-    dark:"#98460C",
-    angle:30
-  }
+const players=[
+  {id:"P5",name:"P5",color:"#09B95A",dark:"#057139",light:"#55F39A",angle:-90},
+  {id:"P6",name:"P6",color:"#F47A16",dark:"#994208",light:"#FFB063",angle:-30},
+  {id:"P1",name:"P1",color:"#087EF2",dark:"#034C9A",light:"#55B9FF",angle:30},
+  {id:"P2",name:"P2",color:"#F0C400",dark:"#9D7C00",light:"#FFE65A",angle:90},
+  {id:"P3",name:"P3",color:"#8428C7",dark:"#4D1479",light:"#C15BFF",angle:150},
+  {id:"P4",name:"P4",color:"#E62B32",dark:"#8E161A",light:"#FF666C",angle:210}
 ];
+
+/* --------------------------------
+   RESIZE
+-------------------------------- */
 
 function resize(){
 
-  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const dpr=Math.min(devicePixelRatio||1,2);
 
-  S=Math.min(window.innerWidth,window.innerHeight);
+  size=Math.min(innerWidth,innerHeight);
 
-  W=S;
-  H=S;
+  canvas.width=size*dpr;
+  canvas.height=size*dpr;
 
-  canvas.width=S*dpr;
-  canvas.height=S*dpr;
-
-  canvas.style.width=S+"px";
-  canvas.style.height=S+"px";
+  canvas.style.width=size+"px";
+  canvas.style.height=size+"px";
 
   ctx.setTransform(dpr,0,0,dpr,0,0);
 
-  CX=S/2;
-  CY=S/2;
+  cx=size/2;
+  cy=size/2;
 
   draw();
 }
 
-window.addEventListener("resize",resize);
+addEventListener("resize",resize);
 
 
-/* =========================
-   BASIC HELPERS
-========================= */
+/* --------------------------------
+   HELPERS
+-------------------------------- */
 
-function rad(deg){
+function R(deg){
   return deg*Math.PI/180;
 }
 
-function point(r,a){
-
-  const t=rad(a-90);
-
+function polar(r,a){
+  a=R(a-90);
   return {
-    x:CX+Math.cos(t)*r,
-    y:CY+Math.sin(t)*r
+    x:cx+Math.cos(a)*r,
+    y:cy+Math.sin(a)*r
   };
 }
 
-function polygon(points,fill,stroke="#07131d",lw=2){
+function poly(points,fill,stroke="#07131c",width=2){
 
   ctx.beginPath();
 
   points.forEach((p,i)=>{
-    if(i===0)ctx.moveTo(p.x,p.y);
-    else ctx.lineTo(p.x,p.y);
+    i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y);
   });
 
   ctx.closePath();
@@ -226,127 +170,145 @@ function polygon(points,fill,stroke="#07131d",lw=2){
 
   if(stroke){
     ctx.strokeStyle=stroke;
-    ctx.lineWidth=lw;
+    ctx.lineWidth=width;
     ctx.stroke();
   }
 }
 
-function roundRect(x,y,w,h,r,fill,stroke){
+function hex(x,y,r,fill,stroke="#111",width=2){
 
   ctx.beginPath();
 
-  ctx.roundRect(x,y,w,h,r);
+  for(let i=0;i<6;i++){
+
+    const a=R(i*60-30);
+    const px=x+Math.cos(a)*r;
+    const py=y+Math.sin(a)*r;
+
+    i?ctx.lineTo(px,py):ctx.moveTo(px,py);
+  }
+
+  ctx.closePath();
 
   ctx.fillStyle=fill;
   ctx.fill();
 
-  if(stroke){
-    ctx.strokeStyle=stroke;
-    ctx.lineWidth=1;
-    ctx.stroke();
-  }
+  ctx.strokeStyle=stroke;
+  ctx.lineWidth=width;
+  ctx.stroke();
 }
 
 
-/* =========================
+/* --------------------------------
    BACKGROUND
-========================= */
+-------------------------------- */
 
 function background(){
 
   const g=ctx.createRadialGradient(
-    CX,CY,S*.08,
-    CX,CY,S*.72
+    cx,cy,size*.05,
+    cx,cy,size*.75
   );
 
-  g.addColorStop(0,"#102b3a");
-  g.addColorStop(.55,"#071722");
-  g.addColorStop(1,"#010509");
+  g.addColorStop(0,"#102B3B");
+  g.addColorStop(.55,"#07141E");
+  g.addColorStop(1,"#010408");
 
   ctx.fillStyle=g;
-  ctx.fillRect(0,0,S,S);
+  ctx.fillRect(0,0,size,size);
 
-  /* subtle pattern */
+  /* marble-like lines */
 
-  ctx.globalAlpha=.12;
+  ctx.globalAlpha=.10;
+  ctx.strokeStyle="#8DA9B8";
+  ctx.lineWidth=1;
 
-  for(let x=0;x<S;x+=35){
+  for(let i=0;i<18;i++){
 
-    for(let y=0;y<S;y+=35){
+    ctx.beginPath();
 
-      ctx.beginPath();
+    ctx.moveTo(
+      Math.random()*size,
+      0
+    );
 
-      ctx.arc(x,y,1,0,Math.PI*2);
+    ctx.bezierCurveTo(
+      size*.2,
+      size*.3,
+      size*.8,
+      size*.6,
+      Math.random()*size,
+      size
+    );
 
-      ctx.fillStyle="#77A0B8";
-      ctx.fill();
-    }
+    ctx.stroke();
   }
 
   ctx.globalAlpha=1;
 }
 
 
-/* =========================
-   OUTER BOARD
-========================= */
+/* --------------------------------
+   OUTER GOLD FRAME
+-------------------------------- */
 
-function outerBoard(){
+function frame(){
 
-  const r=S*.465;
+  const r=size*.465;
 
   ctx.save();
 
   ctx.shadowColor="#000";
-  ctx.shadowBlur=S*.025;
+  ctx.shadowBlur=size*.025;
 
   ctx.beginPath();
-  ctx.arc(CX,CY,r,0,Math.PI*2);
+  ctx.arc(cx,cy,r,0,Math.PI*2);
 
-  ctx.fillStyle="#07141e";
+  ctx.fillStyle="#07131D";
   ctx.fill();
 
   const gold=ctx.createLinearGradient(
-    CX-r,CY-r,
-    CX+r,CY+r
+    cx-r,cy-r,
+    cx+r,cy+r
   );
 
-  gold.addColorStop(0,"#6f430b");
-  gold.addColorStop(.2,"#e5a52a");
-  gold.addColorStop(.48,"#ffe88a");
-  gold.addColorStop(.7,"#d18c1b");
-  gold.addColorStop(1,"#71440b");
+  gold.addColorStop(0,"#70430A");
+  gold.addColorStop(.25,"#F4B52F");
+  gold.addColorStop(.5,"#FFE78B");
+  gold.addColorStop(.75,"#C77F16");
+  gold.addColorStop(1,"#6E4009");
 
   ctx.strokeStyle=gold;
-  ctx.lineWidth=S*.014;
+  ctx.lineWidth=size*.014;
   ctx.stroke();
 
   ctx.restore();
 
   ctx.beginPath();
-  ctx.arc(CX,CY,r*.95,0,Math.PI*2);
+  ctx.arc(cx,cy,r*.955,0,Math.PI*2);
 
-  ctx.strokeStyle="#35596d";
-  ctx.lineWidth=S*.005;
+  ctx.strokeStyle="#416277";
+  ctx.lineWidth=size*.004;
   ctx.stroke();
 }
 
 
-/* =========================
+/* --------------------------------
    SIX HOME AREAS
-========================= */
+-------------------------------- */
 
-function homeArea(player){
+function home(player){
 
-  const outer=S*.395;
-  const inner=S*.115;
+  const outer=size*.375;
+  const inner=size*.105;
+  const spread=28;
 
-  const spread=27;
+  const a=player.angle;
 
-  const p1=point(inner,player.angle-spread);
-  const p2=point(outer,player.angle-spread);
-  const p3=point(outer,player.angle+spread);
-  const p4=point(inner,player.angle+spread);
+  const p1=polar(inner,a-spread);
+  const p2=polar(outer,a-spread);
+  const p3=polar(outer,a+spread);
+  const p4=polar(inner,a+spread);
 
   const grad=ctx.createLinearGradient(
     p2.x,p2.y,
@@ -354,165 +316,138 @@ function homeArea(player){
   );
 
   grad.addColorStop(0,player.light);
-  grad.addColorStop(.48,player.color);
+  grad.addColorStop(.45,player.color);
   grad.addColorStop(1,player.dark);
 
-  polygon(
+  poly(
     [p1,p2,p3,p4],
     grad,
-    "#061019",
-    S*.006
+    "#06111A",
+    size*.005
   );
 
   /* inner highlight */
 
-  const q1=point(S*.135,player.angle-spread+3);
-  const q2=point(S*.365,player.angle-spread+3);
-  const q3=point(S*.365,player.angle+spread-3);
-  const q4=point(S*.135,player.angle+spread-3);
+  const q1=polar(size*.13,a-spread+3);
+  const q2=polar(size*.35,a-spread+3);
+  const q3=polar(size*.35,a+spread-3);
+  const q4=polar(size*.13,a+spread-3);
 
-  polygon(
+  poly(
     [q1,q2,q3,q4],
     player.color,
-    "#ffffff15",
+    "#ffffff22",
     1
   );
 }
 
 
-/* =========================
-   HOME LANES
-========================= */
+/* --------------------------------
+   HOME LANE
+-------------------------------- */
 
 function homeLane(player){
 
-  /*
-     6 colored cells running
-     from home towards center
-  */
-
   for(let i=1;i<=6;i++){
 
-    const r=S*.265-i*S*.026;
+    const r=size*.255-(i-1)*size*.026;
 
-    const p=point(r,player.angle);
+    const p=polar(r,player.angle);
 
-    const cell=S*.027;
+    const w=size*.034;
 
-    roundRect(
-      p.x-cell/2,
-      p.y-cell/2,
-      cell,
-      cell,
-      cell*.12,
-      player.color,
-      "#07131d"
+    ctx.fillStyle=player.color;
+
+    ctx.strokeStyle="#07131D";
+    ctx.lineWidth=1.5;
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+      p.x-w/2,
+      p.y-w/2,
+      w,
+      w,
+      w*.12
     );
+
+    ctx.fill();
+    ctx.stroke();
   }
 }
 
 
-/* =========================
+/* --------------------------------
    TRACK
-========================= */
+-------------------------------- */
 
-const TRACK_COUNT=72;
+/*
+  72 cells
+  12 cells per player
+*/
 
-function trackPoint(index){
+const TRACK=72;
 
-  /*
-    Hexagon-like circular route.
-    This makes the path look like
-    the reference rather than a
-    perfect circle.
-  */
+function trackPoint(i){
 
-  const side=index%12;
+  const section=Math.floor(i/12);
+  const inside=i%12;
 
-  const section=Math.floor(index/12);
+  const start=section*60-30;
+  const end=start+60;
 
-  const a1=section*60-30;
-  const a2=a1+60;
+  const t=inside/12;
 
-  const t=side/12;
-
-  const p1=point(S*.335,a1);
-  const p2=point(S*.335,a2);
+  const a=polar(size*.335,start);
+  const b=polar(size*.335,end);
 
   return {
-    x:p1.x+(p2.x-p1.x)*t,
-    y:p1.y+(p2.y-p1.y)*t
+    x:a.x+(b.x-a.x)*t,
+    y:a.y+(b.y-a.y)*t
   };
 }
 
-
-/* =========================
-   TRACK CELLS
-========================= */
-
 function drawTrack(){
 
-  const cell=S*.031;
+  const cell=size*.032;
 
-  for(let i=0;i<TRACK_COUNT;i++){
+  for(let i=0;i<TRACK;i++){
 
     const p=trackPoint(i);
 
-    let startPlayer=-1;
+    let color="#F4F7F7";
 
-    for(let j=0;j<6;j++){
+    const playerIndex=Math.floor(i/12);
 
-      if(i===j*12){
-        startPlayer=j;
-        break;
-      }
+    if(i%12===0){
+      color=players[playerIndex].color;
     }
 
-    let fill="#F2F6F7";
+    ctx.fillStyle=color;
+    ctx.strokeStyle="#24343E";
+    ctx.lineWidth=1.2;
 
-    if(startPlayer>=0){
-      fill=COLORS[startPlayer].color;
-    }
+    ctx.beginPath();
 
-    roundRect(
+    ctx.roundRect(
       p.x-cell/2,
       p.y-cell/2,
       cell,
       cell,
-      cell*.15,
-      fill,
-      "#25343D"
+      cell*.13
     );
 
-    if(startPlayer<0){
-
-      ctx.beginPath();
-
-      ctx.moveTo(
-        p.x-cell*.25,
-        p.y-cell*.25
-      );
-
-      ctx.lineTo(
-        p.x+cell*.25,
-        p.y-cell*.25
-      );
-
-      ctx.strokeStyle="#ffffff";
-      ctx.globalAlpha=.35;
-      ctx.lineWidth=1;
-      ctx.stroke();
-      ctx.globalAlpha=1;
-    }
+    ctx.fill();
+    ctx.stroke();
   }
 }
 
 
-/* =========================
-   STARS
-========================= */
+/* --------------------------------
+   STARS — EXACTLY 12
+-------------------------------- */
 
-function drawStar(x,y,r){
+function star(x,y,r){
 
   ctx.save();
 
@@ -522,87 +457,107 @@ function drawStar(x,y,r){
 
   for(let i=0;i<10;i++){
 
-    const rr=i%2===0?r:r*.43;
-
+    const rr=i%2===0?r:r*.42;
     const a=-Math.PI/2+i*Math.PI/5;
 
     const px=Math.cos(a)*rr;
     const py=Math.sin(a)*rr;
 
-    if(i===0)
-      ctx.moveTo(px,py);
-    else
-      ctx.lineTo(px,py);
+    i?ctx.lineTo(px,py):ctx.moveTo(px,py);
   }
 
   ctx.closePath();
 
-  ctx.fillStyle="#FFD83D";
-  ctx.shadowColor="#FFD83D";
-  ctx.shadowBlur=r*.8;
+  ctx.fillStyle="#FFD83C";
+  ctx.strokeStyle="#B77B00";
+  ctx.lineWidth=1;
+
+  ctx.shadowColor="#FFD83C";
+  ctx.shadowBlur=r;
+
   ctx.fill();
+  ctx.stroke();
 
   ctx.restore();
 }
 
-function safeSpots(){
-
-  /*
-     Exactly 12 stars.
-     Two per player.
-  */
+function stars(){
 
   for(let p=0;p<6;p++){
 
-    [p*12+3,p*12+9].forEach(index=>{
+    [p*12+3,p*12+9].forEach(i=>{
 
-      const q=trackPoint(index);
+      const q=trackPoint(i);
 
-      drawStar(
+      star(
         q.x,
         q.y,
-        S*.010
+        size*.010
       );
     });
   }
 }
 
 
-/* =========================
-   PLAYER BASE
-========================= */
+/* --------------------------------
+   ARROWS
+-------------------------------- */
+
+function arrows(){
+
+  players.forEach((player,i)=>{
+
+    const q=trackPoint(i*12+6);
+
+    ctx.save();
+
+    ctx.translate(q.x,q.y);
+
+    ctx.fillStyle=player.color;
+
+    ctx.beginPath();
+
+    ctx.moveTo(size*.009,0);
+    ctx.lineTo(-size*.007,-size*.006);
+    ctx.lineTo(-size*.003,0);
+    ctx.lineTo(-size*.007,size*.006);
+
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  });
+}
+
+
+/* --------------------------------
+   TOKEN
+-------------------------------- */
 
 function token(x,y,player,r){
 
   ctx.save();
 
   ctx.shadowColor="#000";
-  ctx.shadowBlur=r*.7;
+  ctx.shadowBlur=r*.8;
   ctx.shadowOffsetY=r*.25;
 
   const g=ctx.createRadialGradient(
     x-r*.35,
     y-r*.4,
-    r*.05,
+    1,
     x,
     y,
     r
   );
 
-  g.addColorStop(0,"#fff");
-  g.addColorStop(.12,player.light);
-  g.addColorStop(.55,player.color);
+  g.addColorStop(0,"#ffffff");
+  g.addColorStop(.10,player.light);
+  g.addColorStop(.52,player.color);
   g.addColorStop(1,player.dark);
 
   ctx.beginPath();
-
-  ctx.arc(
-    x,
-    y,
-    r,
-    0,
-    Math.PI*2
-  );
+  ctx.arc(x,y,r,0,Math.PI*2);
 
   ctx.fillStyle=g;
   ctx.fill();
@@ -610,14 +565,7 @@ function token(x,y,player,r){
   ctx.restore();
 
   ctx.beginPath();
-
-  ctx.arc(
-    x,
-    y,
-    r*.65,
-    0,
-    Math.PI*2
-  );
+  ctx.arc(x,y,r*.64,0,Math.PI*2);
 
   ctx.strokeStyle="#fff";
   ctx.lineWidth=Math.max(1,r*.09);
@@ -625,212 +573,141 @@ function token(x,y,player,r){
 }
 
 
+/* --------------------------------
+   PLAYER BASE
+-------------------------------- */
+
 function playerBase(player){
 
-  const p=point(S*.425,player.angle);
+  const p=polar(size*.425,player.angle);
 
-  const baseR=S*.055;
+  const base=size*.055;
 
   ctx.save();
 
   ctx.shadowColor="#000";
-  ctx.shadowBlur=S*.015;
+  ctx.shadowBlur=size*.014;
 
   ctx.beginPath();
+  ctx.arc(p.x,p.y,base,0,Math.PI*2);
 
-  ctx.arc(
-    p.x,
-    p.y,
-    baseR,
-    0,
-    Math.PI*2
-  );
-
-  ctx.fillStyle="#030a10";
+  ctx.fillStyle="#02070C";
   ctx.fill();
 
-  ctx.strokeStyle="#ffffff25";
+  ctx.strokeStyle="#ffffff28";
   ctx.lineWidth=2;
   ctx.stroke();
 
   ctx.restore();
 
-  const gap=S*.022;
-  const tr=S*.019;
+  const gap=size*.020;
+  const r=size*.0185;
 
-  token(
-    p.x-gap,
-    p.y-gap,
-    player,
-    tr
-  );
+  token(p.x-gap,p.y-gap,player,r);
+  token(p.x+gap,p.y-gap,player,r);
+  token(p.x-gap,p.y+gap,player,r);
+  token(p.x+gap,p.y+gap,player,r);
 
-  token(
-    p.x+gap,
-    p.y-gap,
-    player,
-    tr
-  );
-
-  token(
-    p.x-gap,
-    p.y+gap,
-    player,
-    tr
-  );
-
-  token(
-    p.x+gap,
-    p.y+gap,
-    player,
-    tr
-  );
-
-  /* player label */
-
-  const label=point(
-    S*.455,
-    player.angle
-  );
+  const label=polar(size*.456,player.angle);
 
   ctx.fillStyle="#fff";
-
-  ctx.font=`900 ${Math.max(12,S*.020)}px Arial`;
-
+  ctx.font=`900 ${Math.max(12,size*.020)}px Arial`;
   ctx.textAlign="center";
   ctx.textBaseline="middle";
 
-  ctx.fillText(
-    player.id,
-    label.x,
-    label.y
-  );
+  ctx.fillText(player.name,label.x,label.y);
 }
 
 
-/* =========================
-   CENTER
-========================= */
+/* --------------------------------
+   DICE
+-------------------------------- */
 
-function hexagon(x,y,r,fill,stroke,lw){
+function dice(){
 
-  ctx.beginPath();
+  const r=size*.097;
 
-  for(let i=0;i<6;i++){
-
-    const a=rad(i*60-30);
-
-    const px=x+Math.cos(a)*r;
-    const py=y+Math.sin(a)*r;
-
-    if(i===0)
-      ctx.moveTo(px,py);
-    else
-      ctx.lineTo(px,py);
-  }
-
-  ctx.closePath();
-
-  ctx.fillStyle=fill;
-  ctx.fill();
-
-  ctx.strokeStyle=stroke;
-  ctx.lineWidth=lw;
-  ctx.stroke();
-}
-
-
-function centerDice(){
-
-  const r=S*.095;
-
-  /* black/gold outer */
-
-  hexagon(
-    CX,
-    CY,
+  hex(
+    cx,
+    cy,
     r,
-    "#050b10",
-    "#F1B83D",
-    S*.007
+    "#02080E",
+    "#F2B833",
+    size*.006
   );
 
-  /* blue inner */
-
-  hexagon(
-    CX,
-    CY,
+  hex(
+    cx,
+    cy,
     r*.78,
-    "#087CDC",
-    "#5EC8FF",
-    S*.004
+    "#056FCE",
+    "#5BC9FF",
+    size*.004
   );
-
-  /* blue glow */
 
   ctx.beginPath();
 
   ctx.arc(
-    CX,
-    CY,
-    r*.51,
+    cx,
+    cy,
+    r*.53,
     0,
     Math.PI*2
   );
 
-  const g=ctx.createRadialGradient(
-    CX-r*.15,
-    CY-r*.2,
+  const glow=ctx.createRadialGradient(
+    cx-r*.2,
+    cy-r*.2,
     2,
-    CX,
-    CY,
+    cx,
+    cy,
     r*.55
   );
 
-  g.addColorStop(0,"#62CFFF");
-  g.addColorStop(.5,"#087EDC");
-  g.addColorStop(1,"#034274");
+  glow.addColorStop(0,"#5BD5FF");
+  glow.addColorStop(.5,"#087DD8");
+  glow.addColorStop(1,"#03416F");
 
-  ctx.fillStyle=g;
+  ctx.fillStyle=glow;
   ctx.fill();
 
-  ctx.strokeStyle="#9AE1FF";
+  ctx.strokeStyle="#9DE7FF";
   ctx.lineWidth=2;
   ctx.stroke();
 
-  drawDice();
+  drawDie();
 }
 
+function drawDie(){
 
-/* =========================
-   DICE
-========================= */
-
-let diceValue=6;
-
-function drawDice(){
-
-  const r=S*.042;
+  const r=size*.040;
 
   ctx.save();
 
   ctx.shadowColor="#000";
-  ctx.shadowBlur=S*.012;
-  ctx.shadowOffsetY=S*.006;
+  ctx.shadowBlur=size*.012;
+  ctx.shadowOffsetY=size*.006;
 
-  roundRect(
-    CX-r,
-    CY-r,
+  ctx.fillStyle="#F8FAFA";
+  ctx.strokeStyle="#CBD5D8";
+  ctx.lineWidth=1.5;
+
+  ctx.beginPath();
+
+  ctx.roundRect(
+    cx-r,
+    cy-r,
     r*2,
     r*2,
-    r*.18,
-    "#F7F8F8",
-    "#CBD7DB"
+    r*.18
   );
+
+  ctx.fill();
+  ctx.stroke();
 
   ctx.restore();
 
-  const spots={
+  const positions={
     1:[[0,0]],
 
     2:[
@@ -869,158 +746,99 @@ function drawDice(){
     ]
   };
 
-  spots[diceValue].forEach(s=>{
+  positions[dice].forEach(v=>{
 
     ctx.beginPath();
 
     ctx.arc(
-      CX+s[0]*r*1.45,
-      CY+s[1]*r*1.45,
+      cx+v[0]*r*1.42,
+      cy+v[1]*r*1.42,
       r*.095,
       0,
       Math.PI*2
     );
 
-    ctx.fillStyle="#D9232E";
+    ctx.fillStyle="#D8232A";
     ctx.fill();
   });
 }
 
 
-/* =========================
-   ARROWS
-========================= */
-
-function arrowAt(index,player){
-
-  const p=trackPoint(index);
-
-  ctx.save();
-
-  ctx.translate(p.x,p.y);
-
-  ctx.fillStyle=player.color;
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-    S*.009,
-    0
-  );
-
-  ctx.lineTo(
-    -S*.008,
-    -S*.006
-  );
-
-  ctx.lineTo(
-    -S*.003,
-    0
-  );
-
-  ctx.lineTo(
-    -S*.008,
-    S*.006
-  );
-
-  ctx.closePath();
-
-  ctx.fill();
-
-  ctx.restore();
-}
-
-function arrows(){
-
-  for(let i=0;i<6;i++){
-
-    arrowAt(
-      i*12+6,
-      COLORS[i]
-    );
-  }
-}
-
-
-/* =========================
-   DRAW EVERYTHING
-========================= */
+/* --------------------------------
+   MAIN DRAW
+-------------------------------- */
 
 function draw(){
 
   background();
 
-  outerBoard();
+  frame();
 
   /*
-     Homes first
+    Six connected home zones
   */
 
-  COLORS.forEach(homeArea);
+  players.forEach(home);
 
   /*
-     Colored home lanes
+    Colored lanes
   */
 
-  COLORS.forEach(homeLane);
+  players.forEach(homeLane);
 
   /*
-     Main continuous track
+    White continuous path
   */
 
   drawTrack();
 
   /*
-     Safe stars
+    Safe stars
   */
 
-  safeSpots();
+  stars();
 
   /*
-     Direction arrows
+    Direction arrows
   */
 
   arrows();
 
   /*
-     Tokens
+    24 tokens
   */
 
-  COLORS.forEach(playerBase);
+  players.forEach(playerBase);
 
   /*
-     Center dice
+    Center
   */
 
-  centerDice();
+  dice();
 }
 
 
-/* =========================
+/* --------------------------------
    DICE CLICK
-========================= */
+-------------------------------- */
 
-canvas.addEventListener("click",(e)=>{
+canvas.addEventListener("click",function(e){
 
   const rect=canvas.getBoundingClientRect();
 
   const x=e.clientX-rect.left;
   const y=e.clientY-rect.top;
 
-  const distance=Math.hypot(
-    x-CX,
-    y-CY
-  );
+  const d=Math.hypot(x-cx,y-cy);
 
-  if(distance<S*.12){
+  if(d<size*.13){
 
-    diceValue=
-      Math.floor(Math.random()*6)+1;
+    dice=Math.floor(Math.random()*6)+1;
 
     draw();
 
-    document.getElementById("status").textContent=
-      `P1 की बारी • ${diceValue} आया • Token चुनें`;
+    document.getElementById("info").textContent=
+      `P1 की बारी • ${dice} आया • Token चुनें`;
   }
 });
 
